@@ -53,12 +53,12 @@ int main() {
     int rc = sqlite3_open("Database.db", &db);
 
 
-    if (Mouse::isButtonPressed(Mouse::Left)){
+    if (Mouse::isButtonPressed(Mouse::Left)){                   // Check for click in button
         Vector2i mousePos = Mouse::getPosition(window);
         if(button1.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             color = Color (77, 18, 166);
             const char *sql=
-          "CREATE TABLE numbers(num1 INTEGER PRIMARY KEY,num2,str);"
+          "CREATE TABLE numbers(num1 INTEGER PRIMARY KEY,num2,str);" // Test
           "INSERT INTO numbers VALUES(1,11,'ABC');"
           "INSERT INTO numbers VALUES(2,22,'DEF');"
           "INSERT INTO numbers VALUES(3,33,'UVW');"
@@ -68,7 +68,7 @@ int main() {
         }
     }
 
-    if (Mouse::isButtonPressed(Mouse::Left)){
+    if (Mouse::isButtonPressed(Mouse::Left)){           // Check for click in button
         Vector2i mousePos = Mouse::getPosition(window);
         if (button2.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             color = Color(62, 122, 86);
