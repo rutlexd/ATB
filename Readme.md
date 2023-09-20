@@ -1,5 +1,4 @@
-# IN CODDING - 30% </br>
-MVP 
+# MVP 
 </br>1. Check name ( relies user text input, create sql-request into USERS name, 
 if name found ask password , else add name to table USERS and ask to create password)
 </br>2. show list with goods ( sql-request , show list from table GOODS (name , count))
