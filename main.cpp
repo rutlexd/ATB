@@ -3,6 +3,7 @@
 #include "sqlite3.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 
 using namespace std;
 using namespace sf;
@@ -12,6 +13,8 @@ int main() {
 
     RenderWindow window(VideoMode(400,600), "main");
     
+    window.setFramerateLimit(12);
+
     Font font;
     font.loadFromFile("Mooli-Regular.ttf");
     if (!font.loadFromFile("Mooli-Regular.ttf"))
@@ -21,22 +24,32 @@ int main() {
 
     
 
-    RectangleShape button1 (Vector2f (120 , 40));
+
+    RectangleShape nameInputBox (Vector2f (120 , 40));
+
+    nameInputBox.setFillColor(Color (255, 255, 255));
+    nameInputBox.setPosition(Vector2f (140,240));
+
+    nameInputBox.setOutlineThickness(5);
+    nameInputBox.setOutlineColor(Color (0, 0, 0));
 
 
-    button1.setFillColor(Color (114, 131, 204));
-    button1.setPosition(Vector2f (200,125));
+    Color color = Color (62, 122, 86, 1);
 
-    RectangleShape button2 (Vector2f (120 , 40));
-
-    button2.setFillColor(Color (114, 131, 204));
-    button2.setPosition(Vector2f (200,325));
-
-    Color color = Color (255, 255, 255, 1);
-
+    string playerInput;
+    string temp = "";
+    Text playerText;
     
+    playerText.setFont(font);
+    playerText.setFillColor(Color (0,0,0));
+    playerText.setPosition(Vector2f (140,240));
+    playerText.setCharacterSize(14);
+
+    bool isNameInput = false;
+
 
     while (window.isOpen()){
+
         Event event;
         while(window.pollEvent(event)){
             if(event.type == Event::Closed){
@@ -49,44 +62,50 @@ int main() {
     char *errMsg = nullptr;
     string userEnter;
 
+
     // Open or create a database
     int rc = sqlite3_open("Database.db", &db);
 
 
-    if (Mouse::isButtonPressed(Mouse::Left)){                   // Check for click in button
-        Vector2i mousePos = Mouse::getPosition(window);
-        if(button1.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-            color = Color (77, 18, 166);
-            const char *sql=
-          "CREATE TABLE numbers(num1 INTEGER PRIMARY KEY,num2,str);" // Test
-          "INSERT INTO numbers VALUES(1,11,'ABC');"
-          "INSERT INTO numbers VALUES(2,22,'DEF');"
-          "INSERT INTO numbers VALUES(3,33,'UVW');"
-          "INSERT INTO numbers VALUES(4,44,'XYZ');" ;
-            rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-            cout << "Button1 is presed" << endl;
+    if (event.type == Event::TextEntered && isNameInput)
+    {               
+        if (event.text.unicode == 8 && playerInput.length() > 0){
+            playerInput.erase(playerInput.end() - 1);
+            playerText.setString(playerInput);
+        }
+        else if(event.text.unicode < 128)
+        {
+            playerInput += event.text.unicode;
+            temp += playerInput;
+            int test = event.text.unicode;
+            playerText.setString(playerInput);
+            cerr << temp << endl;
+            cout << test << " ----" << endl;
         }
     }
-
     if (Mouse::isButtonPressed(Mouse::Left)){           // Check for click in button
         Vector2i mousePos = Mouse::getPosition(window);
-        if (button2.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-            color = Color(62, 122, 86);
-            cout << "Button1 is presed" << endl;
+        if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
+            
+            isNameInput = true;
+
+            cout << "Button2 is presed" << endl;
+        }
+        else{
+            isNameInput = false;
         }
     }
 
+    
 
-    window.draw(button1);
-    window.draw(button2);
+    window.draw(nameInputBox);
+    window.draw(playerText);
 
 
-
-
-   
-    sqlite3_close(db);
+    // sqlite3_close(db);
     window.display(); 
     }
 
+    
     return 0;
 }
