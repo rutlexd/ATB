@@ -12,66 +12,60 @@ using namespace sf;
 string deleteSpaceInString (string name);
 
 int main() {
-
-
-
-    RenderWindow window(VideoMode(400,600), "main");
-    
-    window.setFramerateLimit(10);
+    int width = 400, hight = 600;
+    RenderWindow window(VideoMode(width,hight), "main");
+    int frame = 11;
+    window.setFramerateLimit(frame);
 
     Font font;
-    font.loadFromFile("Mooli-Regular.ttf");
-    if (!font.loadFromFile("Mooli-Regular.ttf"))
+    font.loadFromFile("src/Mooli-Regular.ttf");
+    if (!font.loadFromFile("src/Mooli-Regular.ttf"))
 {
     cout << "Error to load font" << endl;
 }
 
+    RectangleShape nameInputBox (Vector2f (120 , 40));{
 
-
-
-    RectangleShape nameInputBox (Vector2f (120 , 40));
-
-    nameInputBox.setFillColor(Color (255, 255, 255));
+    nameInputBox.setFillColor(Color::White);
     nameInputBox.setPosition(Vector2f (140,240));
     nameInputBox.setOutlineThickness(5);
-    nameInputBox.setOutlineColor(Color (0, 0, 0));
-    
+    nameInputBox.setOutlineColor(Color::Black);}
 
     Color color = Color (62, 122, 86, 1);
 
 
     string playerInput;
-    Text playerText;
+    Text playerInputText;{
     
-    playerText.setFont(font);
-    playerText.setFillColor(Color (0,0,0));
-    playerText.setPosition(Vector2f (140,240));
-    playerText.setCharacterSize(14);
+    playerInputText.setFont(font);
+    playerInputText.setFillColor(Color (0,0,0));
+    playerInputText.setPosition(Vector2f (140,240));
+    playerInputText.setCharacterSize(14);}
 
 
-    Text sentNameText;
+    Text sentNameText;{
 
     sentNameText.setString("Enter");
     sentNameText.setFont(font);
     sentNameText.setFillColor(Color (0, 0, 0));
-    sentNameText.setPosition(Vector2f (160, 340));
+    sentNameText.setPosition(Vector2f (160, 340));}
 
-    RectangleShape sentNameButton;
+    RectangleShape sentNameButton;{
 
     sentNameButton.setSize(Vector2f (120, 40));
     sentNameButton.setFillColor(Color (158, 143, 103));
     sentNameButton.setPosition(Vector2f (140,340));
     sentNameButton.setOutlineThickness(5);
-    sentNameButton.setOutlineColor(Color (0, 0, 0));
+    sentNameButton.setOutlineColor(Color::Black);}
 
 
-    Text nameEmpty;
+    Text nameEmpty;{
 
     nameEmpty.setFont(font);
-    nameEmpty.setFillColor(Color (224, 43, 70));
+    nameEmpty.setFillColor(Color::Red);
     nameEmpty.setString("Name is empty, try again");
     nameEmpty.setPosition(Vector2f (120, 200));
-    nameEmpty.setCharacterSize(16);
+    nameEmpty.setCharacterSize(16);}
 
 
     bool isNameInput = false;
@@ -97,24 +91,20 @@ int main() {
 
     string userEnter;
 
-
-    // Open or create a database
-    
-
     if (event.type == Event::TextEntered && isNameInput)
     {               
         if (event.text.unicode == 8 && playerInput.length() > 0){
             playerInput.erase(playerInput.end() - 1);
-            playerText.setString(playerInput);
+            playerInputText.setString(playerInput);
         }
         else if(event.text.unicode < 128)
         {
             playerInput += event.text.unicode;
-            playerText.setString(playerInput);
+            playerInputText.setString(playerInput);
         }
     }
     
-    if (Mouse::isButtonPressed(Mouse::Left)){           // Check for click in button
+    if (Mouse::isButtonPressed(Mouse::Left)){         
         Vector2i mousePos = Mouse::getPosition(window);
         if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             isNameInput = true;
@@ -127,14 +117,10 @@ int main() {
                 name = deleteSpaceInString(playerInput);
                 playerInput = "";
                 isNameEmpty = false;
-                int rc = sqlite3_open("Database.db", &db);
-
-                const char* str = name.c_str();
-
-                string sqlQuery = "INSERT INTO USERS (userame, password) VALUES (?, ?)";        
-                sqlite3_stmt *stmt;
-
-                rc = sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, nullptr);
+                int rc = sqlite3_open("src/Database.db", &db);
+                sql = "INSERT INTO USERS (username) VALUES ('q' + 'a');";
+                // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
                 if( rc != SQLITE_OK ){
                     fprintf(stderr, "SQL error: %s\n", errMsg);
                     sqlite3_free(errMsg);
@@ -142,11 +128,6 @@ int main() {
                 else {
                     fprintf(stdout, "Records created successfully\n");
                 }
-                sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
-                int password = 1432;
-                sqlite3_bind_int(stmt, 2, password);
-                rc = sqlite3_step(stmt);
-                sqlite3_finalize(stmt);
                 sqlite3_close(db);
             }
             else{
@@ -155,17 +136,13 @@ int main() {
                 name = "";
             }
             playerInput = "";
-            playerText.setString(playerInput);
+            playerInputText.setString(playerInput);
             
         }
     }
 
-    
-
-    
-
     window.draw(nameInputBox);
-    window.draw(playerText);
+    window.draw(playerInputText);
     window.draw(sentNameButton);
     window.draw(sentNameText);
 
@@ -176,7 +153,6 @@ int main() {
     window.display(); 
     }
 
-    
     return 0;
 }
 
@@ -189,3 +165,4 @@ string deleteSpaceInString (string name){
     }
     return output;
 }
+
