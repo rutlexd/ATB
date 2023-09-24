@@ -10,6 +10,9 @@ using namespace std;
 using namespace sf;
 
 string deleteSpaceInString (string name);
+static int my_special_callback(void *unused, int count, char **data, char **columns);
+
+string tempName = "";
 
 int main() {
     int width = 400, hight = 600;
@@ -20,9 +23,9 @@ int main() {
     Font font;
     font.loadFromFile("src/Mooli-Regular.ttf");
     if (!font.loadFromFile("src/Mooli-Regular.ttf"))
-{
+    {
     cout << "Error to load font" << endl;
-}
+    }
 
     RectangleShape nameInputBox (Vector2f (120 , 40));{
 
@@ -68,10 +71,32 @@ int main() {
     nameEmpty.setCharacterSize(16);}
 
 
+    Text NameEnter;
+
+    NameEnter.setFont(font);
+    NameEnter.setFillColor(Color::Black);
+    NameEnter.setString("Enter name");
+    NameEnter.setPosition(Vector2f (120, 150));
+    NameEnter.setCharacterSize(24);
+
+
+    Text PasswordEnter;
+
+    PasswordEnter.setFont(font);
+    PasswordEnter.setFillColor(Color::Black);
+    PasswordEnter.setString("Enter password");
+    PasswordEnter.setPosition(Vector2f (120, 150));
+    PasswordEnter.setCharacterSize(24);
+
+
+    bool isNameEnter = true;
+    bool isPasswordEnter = false;
+
     bool isNameInput = false;
     bool isNameEmpty = false;
 
     string name = "";
+   
 
 
     sqlite3 *db;
@@ -115,11 +140,19 @@ int main() {
         if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             if (playerInput.length() > 0){
                 string name = deleteSpaceInString(playerInput);
+                tempName = name;
                 playerInput = "";
                 isNameEmpty = false;
+
                 int rc = sqlite3_open("src/Database.db", &db);
-                sql = "INSERT INTO USERS(username) VALUES('"+ name +"');";
+                
+                sql = "SELECT username FROM USERS";
+                
+                sqlite3_exec(db, sql.c_str(), my_special_callback, NULL,NULL);
+
+                sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '123');";
                 rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
+                
                 if( rc != SQLITE_OK ){
                     fprintf(stderr, "SQL error: %s\n", errMsg);
                     sqlite3_free(errMsg);
@@ -127,6 +160,8 @@ int main() {
                 else {
                     fprintf(stdout, "Records created successfully\n");
                 }
+
+
                 sqlite3_close(db);
             }
             else{
@@ -149,6 +184,13 @@ int main() {
         window.draw(nameEmpty);
     }
 
+    if (isPasswordEnter){
+        window.draw(PasswordEnter);
+    }
+    else{
+        window.draw(NameEnter);
+    }
+
     window.display(); 
     }
 
@@ -165,3 +207,16 @@ string deleteSpaceInString (string name){
     return output;
 }
 
+static int my_special_callback(void *unused, int count, char **data, char **columns){                   
+
+    cout << "name: "<< tempName << endl;
+
+    if (tempName == data[0]){
+        printf("%s is in table \n", data[0]);
+    }
+    else{
+        cout<< "Isn't in table" << endl;
+    }
+
+    return 0;
+}
