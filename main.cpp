@@ -76,7 +76,7 @@ int main() {
 
     sqlite3 *db;
     char *errMsg = nullptr;
-    char *sql;
+    string sql;
 
     while (window.isOpen()){
 
@@ -114,13 +114,12 @@ int main() {
         }
         if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             if (playerInput.length() > 0){
-                name = deleteSpaceInString(playerInput);
+                string name = deleteSpaceInString(playerInput);
                 playerInput = "";
                 isNameEmpty = false;
                 int rc = sqlite3_open("src/Database.db", &db);
-                sql = "INSERT INTO USERS (username) VALUES ('q' + 'a');";
-                // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+                sql = "INSERT INTO USERS(username) VALUES('"+ name +"');";
+                rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
                 if( rc != SQLITE_OK ){
                     fprintf(stderr, "SQL error: %s\n", errMsg);
                     sqlite3_free(errMsg);
