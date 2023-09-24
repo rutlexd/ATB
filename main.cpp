@@ -13,6 +13,9 @@ string deleteSpaceInString (string name);
 static int my_special_callback(void *unused, int count, char **data, char **columns);
 
 string tempName = "";
+string tempPassword = "";
+
+bool loginSucceffuly = false;
 
 int main() {
     int width = 400, hight = 600;
@@ -27,23 +30,33 @@ int main() {
     cout << "Error to load font" << endl;
     }
 
+    Color color = Color (62, 122, 86, 1);  // Колір ригачів
+
     RectangleShape nameInputBox (Vector2f (120 , 40));{
 
     nameInputBox.setFillColor(Color::White);
-    nameInputBox.setPosition(Vector2f (140,240));
+    nameInputBox.setPosition(Vector2f (140,150));
     nameInputBox.setOutlineThickness(5);
     nameInputBox.setOutlineColor(Color::Black);}
 
-    Color color = Color (62, 122, 86, 1);
+    RectangleShape passwordInputBox (Vector2f (120 , 40));{
+
+    passwordInputBox.setFillColor(Color::White);
+    passwordInputBox.setPosition(Vector2f (140,240));
+    passwordInputBox.setOutlineThickness(5);
+    passwordInputBox.setOutlineColor(Color::Black);}
 
 
-    string playerInput;
-    Text playerInputText;{
+    Text nameInputText;{
     
-    playerInputText.setFont(font);
-    playerInputText.setFillColor(Color (0,0,0));
-    playerInputText.setPosition(Vector2f (140,240));
-    playerInputText.setCharacterSize(14);}
+    nameInputText.setFont(font);
+    nameInputText.setFillColor(Color::Black);
+    nameInputText.setPosition(Vector2f (140,150));
+    nameInputText.setCharacterSize(14);}
+
+    Text passwordInputText = nameInputText;
+
+    passwordInputText.setPosition(Vector2f(140,240));
 
 
     Text sentNameText;{
@@ -62,46 +75,46 @@ int main() {
     sentNameButton.setOutlineColor(Color::Black);}
 
 
-    Text nameEmpty;{
+    Text inputError;{
 
-    nameEmpty.setFont(font);
-    nameEmpty.setFillColor(Color::Red);
-    nameEmpty.setString("Name is empty, try again");
-    nameEmpty.setPosition(Vector2f (120, 200));
-    nameEmpty.setCharacterSize(16);}
+    inputError.setFont(font);
+    inputError.setFillColor(Color::Red);
+    inputError.setString("Error, try again");
+    inputError.setPosition(Vector2f (120, 200));
+    inputError.setCharacterSize(16);}
 
 
     Text NameEnter;
 
     NameEnter.setFont(font);
     NameEnter.setFillColor(Color::Black);
-    NameEnter.setString("Enter name");
-    NameEnter.setPosition(Vector2f (120, 150));
-    NameEnter.setCharacterSize(24);
+    NameEnter.setString("Name");
+    NameEnter.setPosition(Vector2f (30, 150));
+    NameEnter.setCharacterSize(20);
 
 
     Text PasswordEnter;
 
     PasswordEnter.setFont(font);
     PasswordEnter.setFillColor(Color::Black);
-    PasswordEnter.setString("Enter password");
-    PasswordEnter.setPosition(Vector2f (120, 150));
-    PasswordEnter.setCharacterSize(24);
+    PasswordEnter.setString("Password");
+    PasswordEnter.setPosition(Vector2f (30, 240));
+    PasswordEnter.setCharacterSize(20);
 
 
-    bool isNameEnter = true;
-    bool isPasswordEnter = false;
-
+    bool isPasswordInput = false;
     bool isNameInput = false;
-    bool isNameEmpty = false;
 
+    bool isInputError = false;
+
+    string playerNameInput;
+    string playerPasswordInput;
     string name = "";
    
-
-
     sqlite3 *db;
     char *errMsg = nullptr;
     string sql;
+
 
     while (window.isOpen()){
 
@@ -109,23 +122,35 @@ int main() {
         while(window.pollEvent(event)){
             if(event.type == Event::Closed){
                 window.close();
+                return 0;
             }
         }
 
     window.clear(color);
-
-    string userEnter;
-
-    if (event.type == Event::TextEntered && isNameInput)
-    {               
-        if (event.text.unicode == 8 && playerInput.length() > 0){
-            playerInput.erase(playerInput.end() - 1);
-            playerInputText.setString(playerInput);
+\
+    if (event.type == Event::TextEntered)
+    {   
+        if(isNameInput){            
+            if (event.text.unicode == 8 && playerNameInput.length() > 0){
+                playerNameInput.erase(playerNameInput.end() - 1);
+                nameInputText.setString(playerNameInput);
+            }
+            else if(event.text.unicode < 128)
+            {
+                playerNameInput += event.text.unicode;
+                nameInputText.setString(playerNameInput);
+            }
         }
-        else if(event.text.unicode < 128)
-        {
-            playerInput += event.text.unicode;
-            playerInputText.setString(playerInput);
+        else if (isPasswordInput){
+            if (event.text.unicode == 8 && playerPasswordInput.length() > 0){
+                playerPasswordInput.erase(playerPasswordInput.end() - 1);
+                passwordInputText.setString(playerPasswordInput);
+            }
+            else if(event.text.unicode < 128)
+            {
+                playerPasswordInput += event.text.unicode;
+                passwordInputText.setString(playerPasswordInput);
+            }
         }
     }
     
@@ -133,24 +158,30 @@ int main() {
         Vector2i mousePos = Mouse::getPosition(window);
         if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
             isNameInput = true;
+            isPasswordInput = false;
+        }
+        else if (passwordInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
+            isPasswordInput = true;
+            isNameInput = false;
         }
         else{
             isNameInput = false;
         }
         if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-            if (playerInput.length() > 0){
-                string name = deleteSpaceInString(playerInput);
+            if (playerNameInput.length() > 0 && playerPasswordInput.length() > 0){
+                string name = deleteSpaceInString(playerNameInput);
+                string password = deleteSpaceInString(playerPasswordInput);
                 tempName = name;
-                playerInput = "";
-                isNameEmpty = false;
+                tempPassword = password;
+                playerNameInput = "";
+                isInputError = false;
 
                 int rc = sqlite3_open("src/Database.db", &db);
                 
-                sql = "SELECT username FROM USERS";
+                sql = "SELECT * FROM USERS";
                 
                 sqlite3_exec(db, sql.c_str(), my_special_callback, NULL,NULL);
-
-                sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '123');";
+                sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
                 rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
                 
                 if( rc != SQLITE_OK ){
@@ -158,44 +189,66 @@ int main() {
                     sqlite3_free(errMsg);
                 } 
                 else {
+                    loginSucceffuly = true;
                     fprintf(stdout, "Records created successfully\n");
                 }
 
-
+            
                 sqlite3_close(db);
             }
             else{
                 cout << "name error" << endl;
-                isNameEmpty = true; 
+                isInputError = true; 
                 name = "";
             }
-            playerInput = "";
-            playerInputText.setString(playerInput);
+            
+            playerNameInput = "";
+            playerPasswordInput = "";
+            passwordInputText.setString(playerPasswordInput);
+            nameInputText.setString(playerNameInput);
             
         }
     }
 
+    if (loginSucceffuly){
+        window.close();
+    }
+
+
     window.draw(nameInputBox);
-    window.draw(playerInputText);
+    window.draw(passwordInputBox);
+    window.draw(PasswordEnter);
+    window.draw(NameEnter);
+
+    window.draw(passwordInputText);
+    window.draw(nameInputText);
+
     window.draw(sentNameButton);
-    window.draw(sentNameText);
-
-    if (isNameEmpty){
-        window.draw(nameEmpty);
+    window.draw(sentNameText);   
+    if (isInputError){
+        window.draw(inputError);
     }
-
-    if (isPasswordEnter){
-        window.draw(PasswordEnter);
-    }
-    else{
-        window.draw(NameEnter);
-    }
-
     window.display(); 
     }
 
+    RenderWindow shop(VideoMode(width,hight), "shop");
+
+
+    while (shop.isOpen()){
+        Event event;
+        while(shop.pollEvent(event)){
+            if(event.type == Event::Closed){
+                shop.close();
+            }
+    }
+    shop.clear(Color::White);
+    shop.display();
+    }
     return 0;
 }
+
+
+
 
 string deleteSpaceInString (string name){
     string output = "";
@@ -209,13 +262,18 @@ string deleteSpaceInString (string name){
 
 static int my_special_callback(void *unused, int count, char **data, char **columns){                   
 
-    cout << "name: "<< tempName << endl;
-
+    cout << "name: " << tempName << endl;
+    cout << "password " << tempPassword << endl;
     if (tempName == data[0]){
         printf("%s is in table \n", data[0]);
-    }
-    else{
-        cout<< "Isn't in table" << endl;
+        printf("%s is password \n", data[1]);
+        if (tempPassword == data[1]){
+            cout << "login succeffuly" << endl;
+            loginSucceffuly = true;
+        }
+        else{
+            cout << "Inccorect password" << endl;
+        }
     }
 
     return 0;
