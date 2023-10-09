@@ -10,50 +10,56 @@
 using namespace std;
 using namespace sf;
 
+struct USER
+{
+    string name;
+    string password;
+    bool successfullyCheck = 0;
+};
+
+struct GOODS
+{
+    vector <string> name;
+    vector <string> count;
+};
+
 string deleteSpaceInString (string name);
 static int login_callback(void *unused, int count, char **data, char **columns);
 static int listOfGoods_callback(void *unused, int count, char **data, char **columns);
 static int checkForNull_callback(void *unused, int count, char **data, char **columns);
-int showLogin(Font font);
-void showShop (Font font);
-
-string globalName = "";
-string globalPassword = "";
-
-bool loginSucceffuly = false;
-
-vector <string> prod; 
-vector <string> prodCount;
-
-string GlobalCount;
+int showLogin();
+void showShop ();
+bool loginUser(string inputName, string inputPassword);
+GOODS createListOfGoods();
+void editCount(int button, GOODS goods);
+GOODS updateGoods();
+Font getFont();
 
 const int WIDTH = 400;
 const int HIGHT = 600;
 const int FRAME = 11;
+const Font FONT = getFont();
+const char *WAYTODB = "src/Database.db";
+
 
 int main() {
 
-    Font font;
-    font.loadFromFile("src/Mooli-Regular.ttf");
-    if (!font.loadFromFile("src/Mooli-Regular.ttf")){
-    cout << "Error to load font" << endl;
-    }
-    int CheckForCLose = showLogin(font);
-    if (CheckForCLose == 1){
+    if (showLogin() == 1){
         return 0;
     }
-    showShop(font);
+    showShop();
 
     return 0;
 }
 
-int showLogin(Font font){
+int showLogin(){
     
     RenderWindow window(VideoMode(WIDTH,HIGHT), "login");
     
     window.setFramerateLimit(FRAME);
 
-    Color swampGreenColor = Color (62, 122, 86, 1);  
+    Color swampGreenColor = Color (62, 122, 86);  
+    Color coffeColor = Color (158, 143, 103);
 
     RectangleShape nameInputBox (Vector2f (120 , 40));
 
@@ -70,8 +76,8 @@ int showLogin(Font font){
     passwordInputBox.setOutlineColor(Color::Black);
 
     Text nameInputText;
-    
-    nameInputText.setFont(font);
+   
+    nameInputText.setFont(FONT);
     nameInputText.setFillColor(Color::Black);
     nameInputText.setPosition(Vector2f (140,150));
     nameInputText.setCharacterSize(14);
@@ -84,21 +90,21 @@ int showLogin(Font font){
     Text sentNameText;
 
     sentNameText.setString("Enter");
-    sentNameText.setFont(font);
-    sentNameText.setFillColor(Color (0, 0, 0));
+    sentNameText.setFont(FONT);
+    sentNameText.setFillColor(Color::Black);
     sentNameText.setPosition(Vector2f (160, 340));
 
     RectangleShape sentNameButton;
 
     sentNameButton.setSize(Vector2f (120, 40));
-    sentNameButton.setFillColor(Color (158, 143, 103));
+    sentNameButton.setFillColor(coffeColor);
     sentNameButton.setPosition(Vector2f (140,340));
     sentNameButton.setOutlineThickness(5);
     sentNameButton.setOutlineColor(Color::Black);
 
     Text inputError;
 
-    inputError.setFont(font);
+    inputError.setFont(FONT);
     inputError.setFillColor(Color::Red);
     inputError.setString("Error, try again");
     inputError.setPosition(Vector2f (120, 200));
@@ -106,7 +112,7 @@ int showLogin(Font font){
 
     Text nameEnter;
 
-    nameEnter.setFont(font);
+    nameEnter.setFont(FONT);
     nameEnter.setFillColor(Color::Black);
     nameEnter.setString("Name");
     nameEnter.setPosition(Vector2f (30, 150));
@@ -114,7 +120,7 @@ int showLogin(Font font){
 
     Text passwordEnter;
 
-    passwordEnter.setFont(font);
+    passwordEnter.setFont(FONT);
     passwordEnter.setFillColor(Color::Black);
     passwordEnter.setString("Password");
     passwordEnter.setPosition(Vector2f (30, 240));
@@ -127,12 +133,7 @@ int showLogin(Font font){
 
     string playerNameInput;
     string playerPasswordInput;
-    string name = "";
    
-    sqlite3 *db;
-    char *errMsg = nullptr;
-    string sql;
-
     while (window.isOpen()){
 
         Event event;
@@ -162,8 +163,7 @@ int showLogin(Font font){
                     playerPasswordInput.erase(playerPasswordInput.end() - 1);
                     passwordInputText.setString(playerPasswordInput);
                 }
-                else if (event.text.unicode < 128 && event.text.unicode != 8)
-                {
+                else if (event.text.unicode < 128 && event.text.unicode != 8){
                     playerPasswordInput += event.text.unicode;
                     passwordInputText.setString(playerPasswordInput);
                 }
@@ -173,48 +173,23 @@ int showLogin(Font font){
         if (Mouse::isButtonPressed(Mouse::Left)){         
             Vector2i mousePos = Mouse::getPosition(window);
             isNameInput = false;
+            isPasswordInput = false;
             if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-                isNameInput = true;
-                isPasswordInput = false;
+                isNameInput = true; 
             }
             else if (passwordInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
                 isPasswordInput = true;
-                isNameInput = false;
             }
 
             if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
                 if (playerNameInput.length() > 0 && playerPasswordInput.length() > 0){
-                    string name = deleteSpaceInString(playerNameInput);
-                    string password = deleteSpaceInString(playerPasswordInput);
-                    globalName = name;
-                    globalPassword = password;
-                    playerNameInput = "";
-                    isInputError = false;
-
-                    int rc = sqlite3_open("src/Database.db", &db);
-                    
-                    sql = "SELECT * FROM USERS";
-                    
-                    sqlite3_exec(db, sql.c_str(), login_callback, NULL,NULL);
-                    sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
-                    rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
-                    
-                    if( rc != SQLITE_OK ){
-                        fprintf(stderr, "SQL error: %s\n", errMsg);
-                        sqlite3_free(errMsg);
-                    } 
-                    else {
-                        loginSucceffuly = true;
-                        fprintf(stdout, "Records created successfully\n");
+                    if (loginUser(playerNameInput, playerPasswordInput)){
+                        window.close();
                     }
-
-                
-                    sqlite3_close(db);
+                    isInputError = false;
                 }
                 else{
-                    cout << "name error" << endl;
-                    isInputError = true; 
-                    name = "";
+                    isInputError = true;
                 }
                 
                 playerNameInput = "";
@@ -225,13 +200,9 @@ int showLogin(Font font){
             }
         }
 
-        if (loginSucceffuly){
-            window.close();
-        }
-
-
         window.draw(nameInputBox);
         window.draw(passwordInputBox);
+
         window.draw(passwordEnter);
         window.draw(nameEnter);
 
@@ -239,71 +210,68 @@ int showLogin(Font font){
         window.draw(nameInputText);
 
         window.draw(sentNameButton);
-        window.draw(sentNameText);   
+        window.draw(sentNameText);
+
         if (isInputError){
             window.draw(inputError);
         }
+
         window.display(); 
     }
     return 0;
 }
 
 
-void showShop (Font font) {
+void showShop () {
 
     RenderWindow shop(VideoMode(WIDTH,HIGHT), "shop");
 
     shop.setFramerateLimit(FRAME);
 
-    sqlite3 *db;
-    string sql;
-
     RectangleShape operatesButton;
+
     operatesButton.setSize(Vector2f (30, 30));
     operatesButton.setFillColor(Color::White);
     operatesButton.setOutlineThickness(5);
     operatesButton.setOutlineColor(Color::Black);
 
     Text plus;
-    plus.setFont(font);
+
+    plus.setFont(FONT);
     plus.setFillColor(Color::Black);
     plus.setCharacterSize(24);
     plus.setString("+");
 
     Text minus = plus;
+
     minus.setString("-");
-
-    sqlite3_open("src/Database.db", &db);  
-
-    sql = "SELECT * FROM GOODS;";
-
-    sqlite3_exec(db, sql.c_str(), listOfGoods_callback, NULL, NULL); // func create vector of GOODS
-
-    sqlite3_close(db);
     
-    Text product;
     int x = 20;
     int y = 20;
+    
+    GOODS goods = createListOfGoods(); 
 
-    product.setFont(font);
+    Text product;
+
+    product.setFont(FONT);
     product.setFillColor(Color::Black);
     product.setCharacterSize(18);
 
     vector <Text> products;
     vector <Text> countProd;
 
-    for (auto i = 0; i < prod.size(); i++){
+    for (auto i = 0; i < goods.name.size(); i++){
         products.push_back(product);
-        products[i].setString(prod[i]);
+        products[i].setString(goods.name[i]);
         products[i].setPosition(Vector2f (x, y));
         y += 40;
     }
 
     y = 20;
 
-    for (auto i = 0; i < prod.size(); i++){
+    for (auto i = 0; i < goods.name.size(); i++){
         countProd.push_back(product);
-        countProd[i].setString(prodCount[i]);
+        countProd[i].setString(goods.count[i]);
         countProd[i].setPosition(Vector2f (x + 350, y));
         y += 40;
     }
@@ -318,7 +286,7 @@ void showShop (Font font) {
     opButton.setOutlineThickness(3);
     opButton.setOutlineColor(Color::Black);
     opButton.setFillColor(Color::White);
-    
+   
     vector <RectangleShape> opButtons;
     vector <Text> opText;
     
@@ -346,38 +314,23 @@ void showShop (Font font) {
             }
         }
 
-        sqlite3_open("src/Database.db", &db);
         shop.clear(Color::White);
 
         if (Mouse::isButtonPressed(Mouse::Left)){
             Vector2i MousePos = Mouse::getPosition(shop);
-            for (auto i = 0; i < opButtons.size(); i++){
-                if (opButtons[i].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
-                    cout << i << endl;
-                    if (i % 2 == 0){ 
-                        sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ prod[i / 2] + "';";
-                    }
-                    else{
-                        sql = "SELECT count FROM GOODS WHERE name = '"+ prod[i / 2] +"';";
-                        sqlite3_exec(db, sql.c_str(), checkForNull_callback, NULL, NULL);
-                        if (GlobalCount != '0'){
-                            sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ prod[i / 2] + "';";
-                        }
-                    }
-                    sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
-                    prodCount = {};
-                    sql = "SELECT * FROM GOODS;";
+            for (auto button = 0; button < opButtons.size(); button++){
+                if (opButtons[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
                     
-                    sqlite3_exec(db, sql.c_str(), listOfGoods_callback, NULL, NULL);
+                    editCount(button, goods);
+                    goods = updateGoods();
 
-                    for (auto i = 0; i < products.size(); i++){
-                        countProd[i].setString(prodCount[i]);
+                    for (auto i = 0; i < goods.name.size(); i++){
+                        countProd[i].setString(goods.count[i]);
                     }
                 }
             }
-        }
+        }        
 
-        sqlite3_close(db);
         for (auto i = 0; i < products.size(); i++){
             shop.draw(products[i]);
             shop.draw(countProd[i]);
@@ -392,6 +345,7 @@ void showShop (Font font) {
     }
 }
 
+
 string deleteSpaceInString (string name){
     string output = "";
     for (int i = 0; i < name.length(); i++){
@@ -402,32 +356,111 @@ string deleteSpaceInString (string name){
     return output;
 }
 
-static int login_callback(void *unused, int count, char **data, char **columns){                   
 
-    cout << "name: " << globalName << endl;
-    cout << "password " << globalPassword << endl;
-    if (globalName == data[0]){
-        printf("%s is in table \n", data[0]);
-        printf("%s is password \n", data[1]);
-        if (globalPassword == data[1]){
-            cout << "login succeffuly" << endl;
-            loginSucceffuly = true;
-        }
-        else{
-            cout << "Inccorect password" << endl;
-        }
+bool loginUser(string inputName, string inputPassword) {
+    string name = deleteSpaceInString(inputName);
+    string password = deleteSpaceInString(inputPassword);
+
+    sqlite3 *db;
+    char *errMsg = nullptr;
+    string sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
+
+    int rc = sqlite3_open(WAYTODB, &db);
+
+    USER user;
+    user.name = name;
+    user.password = password;
+
+    rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
+    
+    if (rc != SQLITE_OK ){
+        sqlite3_exec(db, "SELECT * FROM USERS", login_callback, &user, NULL);
+        fprintf(stderr, "SQL error: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    } 
+    else{
+        user.successfullyCheck = true;
+        fprintf(stdout, "Records created successfully\n");
     }
 
+    sqlite3_close(db);
+
+    if (user.successfullyCheck){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+
+
+static int login_callback(void *unused, int count, char **data, char **columns){                   
+
+    USER *user = static_cast<USER*>(unused);
+    
+    if (user->name == data[0] && user->password == data[1]){
+        user -> successfullyCheck = true;
+    }
+    
     return 0;
 }
 
+
+GOODS createListOfGoods() {
+
+    sqlite3 *db;
+    GOODS goods;
+
+    sqlite3_open(WAYTODB, &db);
+    sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoods_callback, &goods, NULL);
+    sqlite3_close(db);
+
+    return goods;
+}
+
+
+void editCount(int button, GOODS goods){
+
+    sqlite3 *db;
+    string sql;
+    sqlite3_open(WAYTODB, &db);
+
+    if (button % 2 == 0){ 
+        sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[button / 2] + "';";
+    }
+    else{
+        if (goods.count[button / 2] != '0'){
+            sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[button / 2] + "';";
+        }
+    }
+    sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
+    sqlite3_close(db);
+}
+
+
+GOODS updateGoods(){
+    GOODS goods;
+    sqlite3 *db;
+    sqlite3_open(WAYTODB, &db);
+
+    sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoods_callback, &goods, NULL);
+    sqlite3_close(db);
+
+    return goods;
+}
 static int listOfGoods_callback(void *unused, int count, char **data, char **columns){      
-    prod.push_back(data[0]);
-    prodCount.push_back(data[1]);
-
+  
+    GOODS *goods = static_cast<GOODS*>(unused);
+    goods -> name.push_back(data[0]);
+    goods -> count.push_back(data[1]);
+    
     return 0;
 }
-static int checkForNull_callback(void *unused, int count, char **data, char **columns){      
-    GlobalCount = data[0];
-    return 0;
+
+Font getFont(){ 
+
+    Font font;
+    font.loadFromFile("src/Mooli-Regular.ttf");
+
+    return font;
 }
