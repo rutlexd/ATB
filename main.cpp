@@ -323,7 +323,7 @@ void showShop (){
 
                     editCount(button, goods);
                     goods = updateGoods();
-                    
+
                     for (auto i = 0; i < goods.name.size(); i++){
                         countProd[i].setString(goods.count[i]);
                     }
@@ -425,13 +425,13 @@ void editCount(int button, Goods goods){
     sqlite3 *db;
     string sql;
     sqlite3_open(WAYTODB, &db);
-
+    int miidleButton = button / 2;
     if (button % 2 == 0){ 
-        sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[button / 2] + "';";
+        sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
     }
     else {
         if (goods.count[button / 2] != '0'){
-            sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[button / 2] + "';";
+            sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[miidleButton] + "';";
         }
     }
     sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
