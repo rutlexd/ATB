@@ -58,7 +58,7 @@ int showLogin(){
     
     window.setFramerateLimit(FRAME);
 
-    Color swampGreenColor = Color (62, 122, 86);  
+    Color swampGreenColor = Color (62, 122, 86);
     Color coffeeColor = Color (158, 143, 103);
 
     RectangleShape nameInputBox (Vector2f (120 , 40));
