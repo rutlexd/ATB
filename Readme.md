@@ -16,6 +16,7 @@ At first you need login or registry, after succeffuly enter you can take or put 
 ### Setup (Ubuntu)
 
 ``` sh
+$ sudo apt install g++
 $ sudo apt-get install libsfml-dev
 $ git clone https://github.com/rutlexd/ATB.git
 ```
