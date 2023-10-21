@@ -16,14 +16,14 @@ At first you need login or registry, after succeffuly enter you can take or put 
 ### Setup (Ubuntu)
 
 ``` sh
-$ sudo apt install g++
-$ sudo apt-get install sqlite3 libsqlite3-dev
 $ sudo apt-get install libsfml-dev
 $ git clone https://github.com/rutlexd/ATB.git
 ```
 
 ### Compiling 
 ``` sh
+$ sudo apt install g++
+$ sudo apt-get install sqlite3 libsqlite3-dev
 $ g++ -c main.cpp
 $ g++ main.o -o app -lsqlite3 -lsfml-system -lsfml-window -lsfml-graphics
 ```
