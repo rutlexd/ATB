@@ -7,7 +7,7 @@
 --- 
 ### Func part
 
-#### At first you need login or registry, after succeffuly enter you can take or put some goods
+#### At first you need login or registry, after succeffuly enter you can take or put some goods.
 
 
 </br>![Alt text](src/login.png "Login window") ![Alt text](src/shop.png "Shop window")
