@@ -27,7 +27,7 @@ string deleteSpaceInString(string name);
 static int loginCallback(void *unused, int count, char **data, char **columns);
 static int listOfGoodsCallback(void *unused, int count, char **data, char **columns);
 static int checkForNull_callback(void *unused, int count, char **data, char **columns);
-int showLogin();
+int showLoginWindow();
 void showShop ();
 bool loginUser(string inputName, string inputPassword);
 Goods createGoods();
@@ -44,15 +44,16 @@ const char *WAYTODB = "src/Database.db";
 
 int main(){
 
-    if (showLogin() == 1){
-        return 0;
-    }
+    // if (showLoginWindow() == 1){
+    //     return 0;
+    // }
+    showLoginWindow();
     showShop();
 
     return 0;
 }
 
-int showLogin(){
+int showLoginWindow(){
     
     RenderWindow window(VideoMode(WIDTH, HIGHT), "login");
     
@@ -316,30 +317,30 @@ void showShop (){
 
         shop.clear(Color::White);
 
-        if (Mouse::isButtonPressed(Mouse::Left)){
-            Vector2i MousePos = Mouse::getPosition(shop);
-            for (auto button = 0; button < opButtons.size(); button++){
-                if (opButtons[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
+        // if (Mouse::isButtonPressed(Mouse::Left)){
+        //     Vector2i MousePos = Mouse::getPosition(shop);
+        //     for (auto button = 0; button < opButtons.size(); button++){
+        //         if (opButtons[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
 
-                    editCount(button, goods);
-                    goods = updateGoods();
+        //             editCount(button, goods);
+        //             goods = updateGoods();
 
-                    for (auto i = 0; i < goods.name.size(); i++){
-                        countProd[i].setString(goods.count[i]);
-                    }
-                }
-            }
-        }        
+        //             for (auto i = 0; i < goods.name.size(); i++){
+        //                 countProd[i].setString(goods.count[i]);
+        //             }
+        //         }
+        //     }
+        // }
 
-        for (auto i = 0; i < products.size(); i++){
-            shop.draw(products[i]);
-            shop.draw(countProd[i]);
-        }
+        // for (auto i = 0; i < products.size(); i++){
+        //     shop.draw(products[i]);
+        //     shop.draw(countProd[i]);
+        // }
 
-        for (auto i = 0; i < products.size() * 2; i++){
-            shop.draw(opButtons[i]);
-            shop.draw(opText[i]);
-        }
+        // for (auto i = 0; i < products.size() * 2; i++){
+        //     shop.draw(opButtons[i]);
+        //     shop.draw(opText[i]);
+        // }
 
         shop.display();
     }
@@ -459,7 +460,6 @@ static int listOfGoodsCallback(void *unused, int count, char **data, char **colu
     
     return 0;
 }
-
 
 Font getFont(){ 
 
