@@ -2,7 +2,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
-#include "sqlite3.h"
+#include "src/sqlite3.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
@@ -133,7 +133,7 @@ int showLogin(){
 
     string playerNameInput;
     string playerPasswordInput;
-   
+
     while (window.isOpen()){
 
         Event event;
@@ -169,7 +169,7 @@ int showLogin(){
                 }
             }
         }
-    
+        // aaaaaaaaaaaaaa
         if (Mouse::isButtonPressed(Mouse::Left)){         
             Vector2i mousePos = Mouse::getPosition(window);
             isNameInput = false;
