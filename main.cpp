@@ -169,7 +169,7 @@ int showLogin(){
                 }
             }
         }
-        // aaaaaaaaaaaaaa
+
         if (Mouse::isButtonPressed(Mouse::Left)){         
             Vector2i mousePos = Mouse::getPosition(window);
             isNameInput = false;
