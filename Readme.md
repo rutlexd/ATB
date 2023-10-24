@@ -3,7 +3,7 @@
 
 ### Info
 
-**ATB** is a [my](https://github.com/rutlexd) pet-project. </br> In which i researched ***SQLite*** also with ***GUI***, i relise it with *SFML*.
+**ATB** is a [my](https://github.com/rutlexd) pet-project. </br> In which i researched ***SQLite*** also with ***GUI***, i relise it with ***SFML***.
 
 
 ### Func part

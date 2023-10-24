@@ -34,8 +34,10 @@ Goods createGoods();
 void editCount(int button, Goods goods);
 Goods updateGoods();
 Font getFont();
+Goods editOrder(Goods order, int button, Goods goods);
+string editOne(string str, int button);
 
-const int WIDTH = 400;
+const int WIDTH = 800;
 const int HIGHT = 600;
 const int FRAME = 11;
 const Font defaultFont = getFont();
@@ -44,9 +46,6 @@ const char *WAYTODB = "src/Database.db";
 
 int main(){
 
-    if (showLogin() == 1){
-        return 0;
-    }
     showShop();
 
     return 0;
@@ -305,6 +304,8 @@ void showShop (){
             yMin += 40;
         }
     }
+    
+    Goods order;
 
     while (shop.isOpen()){
         Event event;
@@ -321,9 +322,12 @@ void showShop (){
             for (auto button = 0; button < opButtons.size(); button++){
                 if (opButtons[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
 
-                    editCount(button, goods);
+                    order = editOrder(order, button, goods);
                     goods = updateGoods();
 
+                    for (int i = 0; i < order.name.size(); i++){
+                        cout << order.name[i] << endl << order.count[i] << endl;
+                    }
                     for (auto i = 0; i < goods.name.size(); i++){
                         countProd[i].setString(goods.count[i]);
                     }
@@ -419,6 +423,26 @@ Goods createGoods(){
     return goods;
 }
 
+Goods editOrder(Goods order, int button, Goods goods){  // Написати видалення товару якщо кількість нуль 
+    for (int i = 0; i < order.name.size(); i++){
+        if (order.name[i] == goods.name[button / 2]){
+            order.count[i] = editOne(order.count[i], button);
+            return order;
+        }
+    }
+    if (button % 2 == 0){
+        order.name.push_back(goods.name[button / 2]);
+        order.count.push_back("1");
+    }
+
+    return order;
+}
+
+string editOne(string str, int button){
+    int res = stoi(str);
+    button % 2 == 0 ? res++ : res--;
+    return res < 0 ? to_string(0) : to_string(res);
+}
 
 void editCount(int button, Goods goods){
 
@@ -430,7 +454,7 @@ void editCount(int button, Goods goods){
         sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
     }
     else {
-        if (goods.count[button / 2] != '0'){
+        if (goods.count[miidleButton] != '0'){
             sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[miidleButton] + "';";
         }
     }
