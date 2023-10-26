@@ -35,10 +35,18 @@ void editCount(int button, Goods goods);
 Goods updateGoods();
 Font getFont();
 Goods editOrder(Goods order, int button, Goods goods);
-string editOne(string str, int button);
+Goods editOrder(Goods order, int button, Goods goods, bool minus);
+string editOne(string str, bool add);
+string editOne(string str, bool add, string limit);
+string updateStock (vector <string> stock, int button);
+vector <Text> getDataCount(Goods order);
+vector <Text> getDataGood(Goods order);
+vector <RectangleShape> setDataButton(Goods order);
+vector <Text> setDataText(Goods order);
+int stockName (string str, Goods goods);
 
 const int WIDTH = 800;
-const int HIGHT = 600;
+const int HIGHT = 700;
 const int FRAME = 11;
 const Font defaultFont = getFont();
 const char *WAYTODB = "src/Database.db";
@@ -229,7 +237,7 @@ void showShop (){
 
     RectangleShape operatesButton;
 
-    operatesButton.setSize(Vector2f (30, 30));
+    operatesButton.setSize(Vector2f (30, 30)); // Зробити створення елементів ГУІ у функції
     operatesButton.setFillColor(Color::White);
     operatesButton.setOutlineThickness(5);
     operatesButton.setOutlineColor(Color::Black);
@@ -241,10 +249,11 @@ void showShop (){
     plus.setCharacterSize(24);
     plus.setString("+");
 
-    Text minus = plus;
+    Text orderText = plus;
 
-    minus.setString("-");
-    
+    orderText.setPosition(200, 350);
+    orderText.setString("Order:");    
+
     int x = 20;
     int y = 20;
     
@@ -258,27 +267,35 @@ void showShop (){
 
     vector <Text> products;
     vector <Text> countProd;
+    vector <Text> slesh;
+    vector <Text> stockText;
+    vector <string> stock;
 
     for (auto i = 0; i < goods.name.size(); i++){
         products.push_back(product);
         products[i].setString(goods.name[i]);
         products[i].setPosition(Vector2f (x, y));
-        y += 40;
-    }
 
-    y = 20;
-
-    for (auto i = 0; i < goods.name.size(); i++){
         countProd.push_back(product);
         countProd[i].setString(goods.count[i]);
         countProd[i].setPosition(Vector2f (x + 350, y));
+
+        stockText.push_back(product);
+        stockText[i].setString(goods.count[i]);
+        stockText[i].setPosition(Vector2f (x + 320, y));
+
+        stock.push_back(goods.count[i]);
+
+        slesh.push_back(product);
+        slesh[i].setString("/");
+        slesh[i].setPosition(x + 340, y);
+
         y += 40;
     }
 
     int yPls = 20;
-    int yMin = 20;
-    x = 150;
-
+    int xPls = 180;
+   
     RectangleShape opButton;
 
     opButton.setSize(Vector2f(30,30));
@@ -286,26 +303,23 @@ void showShop (){
     opButton.setOutlineColor(Color::Black);
     opButton.setFillColor(Color::White);
    
-    vector <RectangleShape> opButtons;
-    vector <Text> opText;
-    
-    for (auto i = 0; i < products.size() * 2; i++){
-        opButtons.push_back(opButton);
-        if (i % 2 == 0){
-            opText.push_back(plus);
-            opButtons[i].setPosition(x, yPls);
-            opText[i].setPosition(x + 5, yPls);
-            yPls += 40;
-        }
-        else if (i % 2 != 0){
-            opText.push_back(minus);
-            opButtons[i].setPosition(x + 50, yMin);
-            opText[i].setPosition(x + 55, yMin);
-            yMin += 40;
-        }
+    vector <RectangleShape> plusButton;
+    vector <RectangleShape> minButton;
+    vector <Text> plusText;
+    vector <Text> minusText;
+
+    for (auto i = 0; i < products.size(); i++){
+        plusButton.push_back(opButton);
+        plusText.push_back(plus);
+        plusButton[i].setPosition(xPls, yPls);
+        plusText[i].setPosition(xPls + 5, yPls);
+        yPls += 40;
     }
     
     Goods order;
+
+    vector <Text> orderGoodName;
+    vector <Text> orderGoodCount;
 
     while (shop.isOpen()){
         Event event;
@@ -315,22 +329,36 @@ void showShop (){
             }
         }
 
-        shop.clear(Color::White);
-
+        shop.clear(Color::Cyan);
         if (Mouse::isButtonPressed(Mouse::Left)){
             Vector2i MousePos = Mouse::getPosition(shop);
-            for (auto button = 0; button < opButtons.size(); button++){
-                if (opButtons[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
-
+            for (auto button = 0; button < products.size(); button++){
+                if (plusButton[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
                     order = editOrder(order, button, goods);
-                    goods = updateGoods();
 
-                    for (int i = 0; i < order.name.size(); i++){
-                        cout << order.name[i] << endl << order.count[i] << endl;
-                    }
-                    for (auto i = 0; i < goods.name.size(); i++){
-                        countProd[i].setString(goods.count[i]);
-                    }
+                    stock[button] = editOne(stock[button], false, goods.count[button]);
+                    stockText[button].setString(stock[button]);
+
+                    orderGoodName = getDataGood(order);
+                    orderGoodCount = getDataCount(order);
+
+                    minButton = setDataButton(order);
+                    minusText = setDataText(order);
+                }
+            }
+            for (auto button = 0; button < order.name.size(); button++){
+                if (minButton[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
+                    int index = stockName(order.name[button], goods);
+                    order = editOrder(order, button, goods, true);
+
+                    stock[index] = editOne(stock[index], true, goods.count[index]);
+                    stockText[index].setString(stock[index]);
+
+                    orderGoodName = getDataGood(order);
+                    orderGoodCount = getDataCount(order);
+
+                    minButton = setDataButton(order);
+                    minusText = setDataText(order);                    
                 }
             }
         }        
@@ -338,15 +366,126 @@ void showShop (){
         for (auto i = 0; i < products.size(); i++){
             shop.draw(products[i]);
             shop.draw(countProd[i]);
+
+            shop.draw(slesh[i]);
+            shop.draw(stockText[i]);
+
+            shop.draw(plusButton[i]);
+            shop.draw(plusText[i]);
         }
 
-        for (auto i = 0; i < products.size() * 2; i++){
-            shop.draw(opButtons[i]);
-            shop.draw(opText[i]);
+        for (auto i = 0; i < orderGoodName.size(); i++){
+            shop.draw(orderGoodName[i]);
+            shop.draw(orderGoodCount[i]);
+
+            shop.draw(minButton[i]);
+            shop.draw(minusText[i]);                        
         }
+
+        shop.draw(orderText);
 
         shop.display();
     }
+}
+
+
+int stockName(string str, Goods goods){
+    for (int i = 0; i < goods.name.size(); i++){
+        if (str == goods.name[i]){
+            return i;
+        }
+    }
+}
+
+
+vector <Text> setDataText(Goods order){
+    vector <Text> output;
+    Text templateText;
+
+    templateText.setFont(defaultFont);
+    templateText.setFillColor(Color::Black);
+    templateText.setCharacterSize(18);
+    templateText.setString("-");
+
+    int yMin = 400;
+    int xMin = 190;
+
+    for (int i = 0; i < order.name.size(); i++){
+        output.push_back(templateText);
+        output[i].setPosition(xMin + 5, yMin);
+        yMin += 40;
+    } 
+
+    return output;   
+}
+
+
+vector <RectangleShape> setDataButton(Goods order){
+    vector <RectangleShape> buttons;
+   
+    RectangleShape opButton;
+
+    opButton.setSize(Vector2f(30, 30));
+    opButton.setOutlineThickness(3);
+    opButton.setOutlineColor(Color::Black);
+    opButton.setFillColor(Color::White);  
+
+    int yMin = 400;
+    int xMin = 190;
+
+    for(int i = 0; i < order.name.size(); i++){
+        buttons.push_back(opButton);
+        buttons[i].setPosition(xMin, yMin);
+        yMin += 40;
+    }
+    
+    return buttons;
+}
+
+
+vector <Text> getDataGood(Goods order){
+    Text templateText;
+
+    templateText.setFont(defaultFont);
+    templateText.setFillColor(Color::Black);
+    templateText.setCharacterSize(18);
+
+    vector <Text> output;
+
+    int x = 20; 
+    int y = 400;
+
+    for (int i = 0; i < order.name.size(); i++){
+        output.push_back(templateText);
+        output[i].setString(order.name[i]);
+        output[i].setPosition(x, y);
+        y += 40;
+    }
+
+    return output;
+}
+
+
+vector <Text> getDataCount(Goods order){
+    Text templateText;
+
+    templateText.setFont(defaultFont);
+    templateText.setFillColor(Color::Black);
+    templateText.setCharacterSize(18);
+
+    vector <Text> output;
+
+    int x = 160; 
+    int y = 400;
+
+    for (int i = 0; i < order.name.size(); i++){
+        output.push_back(templateText);
+        output[i].setString(order.count[i]);
+        output[i].setPosition(x, y);
+        y += 40;
+    }
+
+    return output;
 }
 
 
@@ -423,26 +562,50 @@ Goods createGoods(){
     return goods;
 }
 
-Goods editOrder(Goods order, int button, Goods goods){  // Написати видалення товару якщо кількість нуль 
+
+Goods editOrder(Goods order, int button, Goods goods){
     for (int i = 0; i < order.name.size(); i++){
-        if (order.name[i] == goods.name[button / 2]){
-            order.count[i] = editOne(order.count[i], button);
+        if (order.name[i] == goods.name[button]){
+            order.count[i] = editOne(order.count[i], true, goods.count[button]);
             return order;
         }
     }
-    if (button % 2 == 0){
-        order.name.push_back(goods.name[button / 2]);
-        order.count.push_back("1");
-    }
 
+    order.name.push_back(goods.name[button]);
+    order.count.push_back("1");
+    
     return order;
 }
 
-string editOne(string str, int button){
+
+Goods editOrder(Goods order, int button, Goods goods, bool minus){
+    for (int i = 0; i < order.name.size(); i++){
+        if (order.name[i] == order.name[button]){
+            order.count[i] = editOne(order.count[i], false);
+            if (order.count[i] == "0"){
+                order.name.erase(order.name.begin() + i);
+                order.count.erase(order.count.begin() + i);
+            }
+        }
+    }
+    return order;
+}
+
+
+string editOne(string str, bool add){
     int res = stoi(str);
-    button % 2 == 0 ? res++ : res--;
+    add ? res++ : res--;
     return res < 0 ? to_string(0) : to_string(res);
 }
+
+
+string editOne(string str, bool add, string limit){
+    int res = stoi(str);
+    add ? res++ : res--;
+    res = res > stoi(limit) ? (stoi(str)) : res;
+    return res < 0 ? to_string(0) : to_string(res);
+}
+
 
 void editCount(int button, Goods goods){
 
