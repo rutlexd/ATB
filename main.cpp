@@ -17,33 +17,39 @@ struct User
     bool successfullyCheck = 0;
 };
 
-struct Goods
+struct Good
 {
-    vector <string> name;
-    vector <string> count;
+    string name;
+    int count;
+};
+
+struct Order
+{
+    string goodName;
+    int count;
+    User user;
 };
 
 string deleteSpaceInString(string name);
 static int loginCallback(void *unused, int count, char **data, char **columns);
 static int listOfGoodsCallback(void *unused, int count, char **data, char **columns);
 static int checkForNull_callback(void *unused, int count, char **data, char **columns);
-int showLogin();
+bool checkLogin();
 void showShop ();
 bool loginUser(string inputName, string inputPassword);
-Goods createGoods();
-void editCount(int button, Goods goods);
-Goods updateGoods();
+vector <Good> createGoods();
+void editCount(int button, vector <Good> goods);
+vector <Good> updateGoods();
 Font getFont();
-Goods editOrder(Goods order, int button, Goods goods);
-Goods editOrder(Goods order, int button, Goods goods, bool minus);
-string editOne(string str, bool add);
-string editOne(string str, bool add, string limit);
+vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods);
+vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods, bool minus);
+int editOne(int num, bool add, int limit);
 string updateStock (vector <string> stock, int button);
-vector <Text> getDataCount(Goods order);
-vector <Text> getDataGood(Goods order);
-vector <RectangleShape> setDataButton(Goods order);
-vector <Text> setDataText(Goods order);
-int stockName (string str, Goods goods);
+vector <Text> getDataCount(vector <Order> orders);
+vector <Text> getDataGood(vector <Order> orders);
+vector <RectangleShape> setDataButton(vector <Order> orders);
+vector <Text> setDataText(vector <Order> orders);
+int stockName (string str, vector <Good> goods);
 
 const int WIDTH = 800;
 const int HIGHT = 700;
@@ -59,174 +65,174 @@ int main(){
     return 0;
 }
 
-int showLogin(){
+
+// bool checkLogin(){
     
-    RenderWindow window(VideoMode(WIDTH, HIGHT), "login");
+//     RenderWindow window(VideoMode(WIDTH, HIGHT), "login");
     
-    window.setFramerateLimit(FRAME);
+//     window.setFramerateLimit(FRAME);
 
-    Color swampGreenColor = Color (62, 122, 86);
-    Color coffeeColor = Color (158, 143, 103);
+//     Color swampGreenColor = Color (62, 122, 86);
+//     Color coffeeColor = Color (158, 143, 103);
 
-    RectangleShape nameInputBox (Vector2f (120 , 40));
+//     RectangleShape nameInputBox (Vector2f (120 , 40));
 
-    nameInputBox.setFillColor(Color::White);
-    nameInputBox.setPosition(Vector2f (140, 150));
-    nameInputBox.setOutlineThickness(5);
-    nameInputBox.setOutlineColor(Color::Black);
+//     nameInputBox.setFillColor(Color::White);
+//     nameInputBox.setPosition(Vector2f (140, 150));
+//     nameInputBox.setOutlineThickness(5);
+//     nameInputBox.setOutlineColor(Color::Black);
 
-    RectangleShape passwordInputBox (Vector2f (120, 40));
+//     RectangleShape passwordInputBox (Vector2f (120, 40));
 
-    passwordInputBox.setFillColor(Color::White);
-    passwordInputBox.setPosition(Vector2f (140, 240));
-    passwordInputBox.setOutlineThickness(5);
-    passwordInputBox.setOutlineColor(Color::Black);
+//     passwordInputBox.setFillColor(Color::White);
+//     passwordInputBox.setPosition(Vector2f (140, 240));
+//     passwordInputBox.setOutlineThickness(5);
+//     passwordInputBox.setOutlineColor(Color::Black);
 
-    Text nameInputText;
+//     Text nameInputText;
 
-    nameInputText.setFont(defaultFont);
-    nameInputText.setFillColor(Color::Black);
-    nameInputText.setPosition(Vector2f (140, 150));
-    nameInputText.setCharacterSize(14);
+//     nameInputText.setFont(defaultFont);
+//     nameInputText.setFillColor(Color::Black);
+//     nameInputText.setPosition(Vector2f (140, 150));
+//     nameInputText.setCharacterSize(14);
 
-    Text passwordInputText;
+//     Text passwordInputText;
 
-    passwordInputText = nameInputText;
-    passwordInputText.setPosition(Vector2f(140, 240));
+//     passwordInputText = nameInputText;
+//     passwordInputText.setPosition(Vector2f(140, 240));
 
-    Text sentNameText;
+//     Text sentNameText;
 
-    sentNameText.setString("Enter");
-    sentNameText.setFont(defaultFont);
-    sentNameText.setFillColor(Color::Black);
-    sentNameText.setPosition(Vector2f (160, 340));
+//     sentNameText.setString("Enter");
+//     sentNameText.setFont(defaultFont);
+//     sentNameText.setFillColor(Color::Black);
+//     sentNameText.setPosition(Vector2f (160, 340));
 
-    RectangleShape sentNameButton;
+//     RectangleShape sentNameButton;
 
-    sentNameButton.setSize(Vector2f (120, 40));
-    sentNameButton.setFillColor(coffeeColor);
-    sentNameButton.setPosition(Vector2f (140, 340));
-    sentNameButton.setOutlineThickness(5);
-    sentNameButton.setOutlineColor(Color::Black);
+//     sentNameButton.setSize(Vector2f (120, 40));
+//     sentNameButton.setFillColor(coffeeColor);
+//     sentNameButton.setPosition(Vector2f (140, 340));
+//     sentNameButton.setOutlineThickness(5);
+//     sentNameButton.setOutlineColor(Color::Black);
 
-    Text inputError;
+//     Text inputError;
 
-    inputError.setFont(defaultFont);
-    inputError.setFillColor(Color::Red);
-    inputError.setString("Error, try again");
-    inputError.setPosition(Vector2f (120, 200));
-    inputError.setCharacterSize(16);
+//     inputError.setFont(defaultFont);
+//     inputError.setFillColor(Color::Red);
+//     inputError.setString("Error, try again");
+//     inputError.setPosition(Vector2f (120, 200));
+//     inputError.setCharacterSize(16);
 
-    Text nameEnter;
+//     Text nameEnter;
 
-    nameEnter.setFont(defaultFont);
-    nameEnter.setFillColor(Color::Black);
-    nameEnter.setString("Name");
-    nameEnter.setPosition(Vector2f (30, 150));
-    nameEnter.setCharacterSize(20);
+//     nameEnter.setFont(defaultFont);
+//     nameEnter.setFillColor(Color::Black);
+//     nameEnter.setString("Name");
+//     nameEnter.setPosition(Vector2f (30, 150));
+//     nameEnter.setCharacterSize(20);
 
-    Text passwordEnter;
+//     Text passwordEnter;
 
-    passwordEnter.setFont(defaultFont);
-    passwordEnter.setFillColor(Color::Black);
-    passwordEnter.setString("Password");
-    passwordEnter.setPosition(Vector2f (30, 240));
-    passwordEnter.setCharacterSize(20);
+//     passwordEnter.setFont(defaultFont);
+//     passwordEnter.setFillColor(Color::Black);
+//     passwordEnter.setString("Password");
+//     passwordEnter.setPosition(Vector2f (30, 240));
+//     passwordEnter.setCharacterSize(20);
 
-    bool isPasswordInput = false;
-    bool isNameInput = false;
+//     bool isPasswordInput = false;
+//     bool isNameInput = false;
 
-    bool isInputError = false;
+//     bool isInputError = false;
 
-    string playerNameInput;
-    string playerPasswordInput;
+//     string playerNameInput;
+//     string playerPasswordInput;
 
-    while (window.isOpen()){
+//     while (window.isOpen()){
 
-        Event event;
-        while (window.pollEvent(event)){
-            if (event.type == Event::Closed){
-                window.close();
-                return 1;
-            }
-        }
+//         Event event;
+//         while (window.pollEvent(event)){
+//             if (event.type == Event::Closed){
+//                 window.close();
+//                 return 1;
+//             }
+//         }
 
-        window.clear(swampGreenColor);
+//         window.clear(swampGreenColor);
 
-        if (event.type == Event::TextEntered){   
-            if (isNameInput){            
-                if (event.text.unicode == 8 && playerNameInput.length() > 0){
-                    playerNameInput.erase(playerNameInput.end() - 1);
-                    nameInputText.setString(playerNameInput);
-                }
-                else if (event.text.unicode < 128 && event.text.unicode != 8)
-                {
-                    playerNameInput += event.text.unicode;
-                    nameInputText.setString(playerNameInput);
-                }
-            }
-            else if (isPasswordInput){
-                if (event.text.unicode == 8 && playerPasswordInput.length() > 0){
-                    playerPasswordInput.erase(playerPasswordInput.end() - 1);
-                    passwordInputText.setString(playerPasswordInput);
-                }
-                else if (event.text.unicode < 128 && event.text.unicode != 8){
-                    playerPasswordInput += event.text.unicode;
-                    passwordInputText.setString(playerPasswordInput);
-                }
-            }
-        }
+//         if (event.type == Event::TextEntered){   
+//             if (isNameInput){            
+//                 if (event.text.unicode == 8 && playerNameInput.length() > 0){
+//                     playerNameInput.erase(playerNameInput.end() - 1);
+//                     nameInputText.setString(playerNameInput);
+//                 }
+//                 else if (event.text.unicode < 128 && event.text.unicode != 8)
+//                 {
+//                     playerNameInput += event.text.unicode;
+//                     nameInputText.setString(playerNameInput);
+//                 }
+//             }
+//             else if (isPasswordInput){
+//                 if (event.text.unicode == 8 && playerPasswordInput.length() > 0){
+//                     playerPasswordInput.erase(playerPasswordInput.end() - 1);
+//                     passwordInputText.setString(playerPasswordInput);
+//                 }
+//                 else if (event.text.unicode < 128 && event.text.unicode != 8){
+//                     playerPasswordInput += event.text.unicode;
+//                     passwordInputText.setString(playerPasswordInput);
+//                 }
+//             }
+//         }
 
-        if (Mouse::isButtonPressed(Mouse::Left)){         
-            Vector2i mousePos = Mouse::getPosition(window);
-            isNameInput = false;
-            isPasswordInput = false;
-            if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-                isNameInput = true; 
-            }
-            else if (passwordInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-                isPasswordInput = true;
-            }
+//         if (Mouse::isButtonPressed(Mouse::Left)){         
+//             Vector2i mousePos = Mouse::getPosition(window);
+//             isNameInput = false;
+//             isPasswordInput = false;
+//             if (nameInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
+//                 isNameInput = true; 
+//             }
+//             else if (passwordInputBox.getGlobalBounds().contains(mousePos.x, mousePos.y)){
+//                 isPasswordInput = true;
+//             }
 
-            if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
-                if (playerNameInput.length() > 0 && playerPasswordInput.length() > 0){
-                    if (loginUser(playerNameInput, playerPasswordInput)){
-                        window.close();
-                    }
-                    isInputError = false;
-                }
-                else {
-                    isInputError = true;
-                }
+//             if (sentNameButton.getGlobalBounds().contains(mousePos.x, mousePos.y)){
+//                 if (playerNameInput.length() > 0 && playerPasswordInput.length() > 0){
+//                     if (loginUser(playerNameInput, playerPasswordInput)){
+//                         window.close();
+//                     }
+//                     isInputError = false;
+//                 }
+//                 else {
+//                     isInputError = true;
+//                 }
                 
-                playerNameInput = "";
-                playerPasswordInput = "";
-                passwordInputText.setString(playerPasswordInput);
-                nameInputText.setString(playerNameInput);
-                
-            }
-        }
+//                 playerNameInput = "";
+//                 playerPasswordInput = "";
+//                 passwordInputText.setString(playerPasswordInput);
+//                 nameInputText.setString(playerNameInput);
+//             }
+//         }
 
-        window.draw(nameInputBox);
-        window.draw(passwordInputBox);
+//         window.draw(nameInputBox);
+//         window.draw(passwordInputBox);
 
-        window.draw(passwordEnter);
-        window.draw(nameEnter);
+//         window.draw(passwordEnter);
+//         window.draw(nameEnter);
 
-        window.draw(passwordInputText);
-        window.draw(nameInputText);
+//         window.draw(passwordInputText);
+//         window.draw(nameInputText);
 
-        window.draw(sentNameButton);
-        window.draw(sentNameText);
+//         window.draw(sentNameButton);
+//         window.draw(sentNameText);
 
-        if (isInputError){
-            window.draw(inputError);
-        }
+//         if (isInputError){
+//             window.draw(inputError);
+//         }
 
-        window.display(); 
-    }
-    return 0;
-}
+//         window.display(); 
+//     }
+//     return 0;
+// }
 
 
 void showShop (){
@@ -237,7 +243,7 @@ void showShop (){
 
     RectangleShape operatesButton;
 
-    operatesButton.setSize(Vector2f (30, 30)); // Зробити створення елементів ГУІ у функції
+    operatesButton.setSize(Vector2f (30, 30)); 
     operatesButton.setFillColor(Color::White);
     operatesButton.setOutlineThickness(5);
     operatesButton.setOutlineColor(Color::Black);
@@ -257,13 +263,26 @@ void showShop (){
     int x = 20;
     int y = 20;
     
-    Goods goods = createGoods(); 
+    vector <Good> goods = createGoods(); 
 
-    Text product;
+    Text textTemplate;
 
-    product.setFont(defaultFont);
-    product.setFillColor(Color::Black);
-    product.setCharacterSize(18);
+    textTemplate.setFont(defaultFont);
+    textTemplate.setFillColor(Color::Black);
+    textTemplate.setCharacterSize(18);
+
+    Text loginText;
+    RectangleShape loginButton;
+
+    loginText = textTemplate;
+    loginText.setString("login");
+    loginText.setPosition(520, 105);
+
+    loginButton = operatesButton;
+
+    loginButton.setSize(Vector2f (90, 30));
+    loginButton.setPosition(500, 100);
+
 
     vector <Text> products;
     vector <Text> countProd;
@@ -271,22 +290,22 @@ void showShop (){
     vector <Text> stockText;
     vector <string> stock;
 
-    for (auto i = 0; i < goods.name.size(); i++){
-        products.push_back(product);
-        products[i].setString(goods.name[i]);
+    for (auto i = 0; i < goods.size(); i++){
+        products.push_back(textTemplate);
+        products[i].setString(goods[i].name);
         products[i].setPosition(Vector2f (x, y));
 
-        countProd.push_back(product);
-        countProd[i].setString(goods.count[i]);
+        countProd.push_back(textTemplate);
+        countProd[i].setString(to_string(goods[i].count));
         countProd[i].setPosition(Vector2f (x + 350, y));
 
-        stockText.push_back(product);
-        stockText[i].setString(goods.count[i]);
+        stockText.push_back(textTemplate);
+        stockText[i].setString(to_string(goods[i].count));
         stockText[i].setPosition(Vector2f (x + 320, y));
 
-        stock.push_back(goods.count[i]);
+        stock.push_back(to_string(goods[i].count));
 
-        slesh.push_back(product);
+        slesh.push_back(textTemplate);
         slesh[i].setString("/");
         slesh[i].setPosition(x + 340, y);
 
@@ -316,10 +335,12 @@ void showShop (){
         yPls += 40;
     }
     
-    Goods order;
+    vector <Order> orders;
 
     vector <Text> orderGoodName;
     vector <Text> orderGoodCount;
+
+    bool succesLogin = false;
 
     while (shop.isOpen()){
         Event event;
@@ -334,33 +355,36 @@ void showShop (){
             Vector2i MousePos = Mouse::getPosition(shop);
             for (auto button = 0; button < products.size(); button++){
                 if (plusButton[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
-                    order = editOrder(order, button, goods);
+                    orders = editOrder(orders, button, goods);
 
-                    stock[button] = editOne(stock[button], false, goods.count[button]);
+                    stock[button] = to_string(editOne(stoi(stock[button]), false, goods[button].count));
                     stockText[button].setString(stock[button]);
 
-                    orderGoodName = getDataGood(order);
-                    orderGoodCount = getDataCount(order);
+                    orderGoodName = getDataGood(orders);
+                    orderGoodCount = getDataCount(orders);
 
-                    minButton = setDataButton(order);
-                    minusText = setDataText(order);
+                    minButton = setDataButton(orders);
+                    minusText = setDataText(orders);
                 }
             }
-            for (auto button = 0; button < order.name.size(); button++){
+            for (auto button = 0; button < orders.size(); button++){
                 if (minButton[button].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
-                    int index = stockName(order.name[button], goods);
-                    order = editOrder(order, button, goods, true);
+                    int index = stockName(orders[button].goodName, goods);
+                    orders = editOrder(orders, button, goods, true);
 
-                    stock[index] = editOne(stock[index], true, goods.count[index]);
+                    stock[index] = to_string(editOne(stoi(stock[index]), true, goods[index].count));
                     stockText[index].setString(stock[index]);
 
-                    orderGoodName = getDataGood(order);
-                    orderGoodCount = getDataCount(order);
+                    orderGoodName = getDataGood(orders);
+                    orderGoodCount = getDataCount(orders);
 
-                    minButton = setDataButton(order);
-                    minusText = setDataText(order);                    
+                    minButton = setDataButton(orders);
+                    minusText = setDataText(orders);                    
                 }
             }
+            // if (loginButton.getGlobalBounds().contains(MousePos.x, MousePos.y)){
+            //     succesLogin = checkLogin();
+            // }
         }        
 
         for (auto i = 0; i < products.size(); i++){
@@ -384,21 +408,25 @@ void showShop (){
 
         shop.draw(orderText);
 
+        shop.draw(loginButton);
+        shop.draw(loginText);
+
         shop.display();
     }
 }
 
 
-int stockName(string str, Goods goods){
-    for (int i = 0; i < goods.name.size(); i++){
-        if (str == goods.name[i]){
+int stockName(string str, vector <Good> goods){
+    for (int i = 0; i < goods.size(); i++){
+        if (str == goods[i].name){
             return i;
         }
     }
+    return 0;
 }
 
 
-vector <Text> setDataText(Goods order){
+vector <Text> setDataText(vector <Order>  order){
     vector <Text> output;
     Text templateText;
 
@@ -410,7 +438,7 @@ vector <Text> setDataText(Goods order){
     int yMin = 400;
     int xMin = 190;
 
-    for (int i = 0; i < order.name.size(); i++){
+    for (int i = 0; i < order.size(); i++){
         output.push_back(templateText);
         output[i].setPosition(xMin + 5, yMin);
         yMin += 40;
@@ -420,7 +448,7 @@ vector <Text> setDataText(Goods order){
 }
 
 
-vector <RectangleShape> setDataButton(Goods order){
+vector <RectangleShape> setDataButton(vector <Order> orders){
     vector <RectangleShape> buttons;
    
     RectangleShape opButton;
@@ -433,7 +461,7 @@ vector <RectangleShape> setDataButton(Goods order){
     int yMin = 400;
     int xMin = 190;
 
-    for(int i = 0; i < order.name.size(); i++){
+    for(int i = 0; i < orders.size(); i++){
         buttons.push_back(opButton);
         buttons[i].setPosition(xMin, yMin);
         yMin += 40;
@@ -443,7 +471,7 @@ vector <RectangleShape> setDataButton(Goods order){
 }
 
 
-vector <Text> getDataGood(Goods order){
+vector <Text> getDataGood(vector <Order> order){
     Text templateText;
 
     templateText.setFont(defaultFont);
@@ -455,9 +483,9 @@ vector <Text> getDataGood(Goods order){
     int x = 20; 
     int y = 400;
 
-    for (int i = 0; i < order.name.size(); i++){
+    for (int i = 0; i < order.size(); i++){
         output.push_back(templateText);
-        output[i].setString(order.name[i]);
+        output[i].setString(order[i].goodName);
         output[i].setPosition(x, y);
         y += 40;
     }
@@ -466,7 +494,7 @@ vector <Text> getDataGood(Goods order){
 }
 
 
-vector <Text> getDataCount(Goods order){
+vector <Text> getDataCount(vector <Order> orders){
     Text templateText;
 
     templateText.setFont(defaultFont);
@@ -478,9 +506,9 @@ vector <Text> getDataCount(Goods order){
     int x = 160; 
     int y = 400;
 
-    for (int i = 0; i < order.name.size(); i++){
+    for (int i = 0; i < orders.size(); i++){
         output.push_back(templateText);
-        output[i].setString(order.count[i]);
+        output[i].setString(to_string(orders[i].count));
         output[i].setPosition(x, y);
         y += 40;
     }
@@ -489,71 +517,71 @@ vector <Text> getDataCount(Goods order){
 }
 
 
-string deleteSpaceInString (string name){
-    string output = "";
-    for (int i = 0; i < name.length(); i++){
-        if (!isspace(name[i])){
-            output += name[i];
-        }
-    }
-    return output;
-}
+// string deleteSpaceInString (string name){
+//     string output = "";
+//     for (int i = 0; i < name.length(); i++){
+//         if (!isspace(name[i])){
+//             output += name[i];
+//         }
+//     }
+//     return output;
+// }
 
 
-bool loginUser(string inputName, string inputPassword){
-    string name = deleteSpaceInString(inputName);
-    string password = deleteSpaceInString(inputPassword);
+// bool loginUser(string inputName, string inputPassword){
+//     string name = deleteSpaceInString(inputName);
+//     string password = deleteSpaceInString(inputPassword);
+
+//     sqlite3 *db;
+//     char *errMsg = nullptr;
+//     string sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
+
+//     int rc = sqlite3_open(WAYTODB, &db);
+
+//     User user;
+//     user.name = name;
+//     user.password = password;
+
+//     rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
+    
+//     if (rc != SQLITE_OK ){
+//         sqlite3_exec(db, "SELECT * FROM USERS", loginCallback, &user, NULL);
+//         fprintf(stderr, "SQL error: %s\n", errMsg);
+//         sqlite3_free(errMsg);
+//     } 
+//     else {
+//         user.successfullyCheck = true;
+//         fprintf(stdout, "Records created successfully\n");
+//     }
+
+//     sqlite3_close(db);
+
+//     if (user.successfullyCheck){
+//         return true;
+//     }
+//     else {
+//         return false;
+//     }
+
+// }
+
+
+// static int loginCallback(void *unused, int count, char **data, char **columns){                   
+
+//     User *user = static_cast<User*>(unused);
+    
+//     if (user->name == data[0] && user->password == data[1]){
+//         user -> successfullyCheck = true;
+//     }
+    
+//     return 0;
+// }
+
+
+vector <Good> createGoods(){
 
     sqlite3 *db;
-    char *errMsg = nullptr;
-    string sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
-
-    int rc = sqlite3_open(WAYTODB, &db);
-
-    User user;
-    user.name = name;
-    user.password = password;
-
-    rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
-    
-    if (rc != SQLITE_OK ){
-        sqlite3_exec(db, "SELECT * FROM USERS", loginCallback, &user, NULL);
-        fprintf(stderr, "SQL error: %s\n", errMsg);
-        sqlite3_free(errMsg);
-    } 
-    else {
-        user.successfullyCheck = true;
-        fprintf(stdout, "Records created successfully\n");
-    }
-
-    sqlite3_close(db);
-
-    if (user.successfullyCheck){
-        return true;
-    }
-    else {
-        return false;
-    }
-
-}
-
-
-static int loginCallback(void *unused, int count, char **data, char **columns){                   
-
-    User *user = static_cast<User*>(unused);
-    
-    if (user->name == data[0] && user->password == data[1]){
-        user -> successfullyCheck = true;
-    }
-    
-    return 0;
-}
-
-
-Goods createGoods(){
-
-    sqlite3 *db;
-    Goods goods;
+    vector <Good> goods;
 
     sqlite3_open(WAYTODB, &db);
     sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
@@ -563,86 +591,87 @@ Goods createGoods(){
 }
 
 
-Goods editOrder(Goods order, int button, Goods goods){
-    for (int i = 0; i < order.name.size(); i++){
-        if (order.name[i] == goods.name[button]){
-            order.count[i] = editOne(order.count[i], true, goods.count[button]);
-            return order;
+vector<Order> editOrder(vector <Order> orders, int button, vector <Good> goods){
+    for (int i = 0; i < orders.size(); i++){
+        if (orders[i].goodName == goods[button].name){
+            orders[i].count = editOne(orders[i].count, true, goods[button].count);
+            return orders;
         }
     }
 
-    order.name.push_back(goods.name[button]);
-    order.count.push_back("1");
+    Order order;
+
+    order.goodName = goods[button].name;
+    order.count = 1;
     
-    return order;
+    orders.push_back(order);
+
+    return orders;
 }
 
 
-Goods editOrder(Goods order, int button, Goods goods, bool minus){
-    for (int i = 0; i < order.name.size(); i++){
-        if (order.name[i] == order.name[button]){
-            order.count[i] = editOne(order.count[i], false);
-            if (order.count[i] == "0"){
-                order.name.erase(order.name.begin() + i);
-                order.count.erase(order.count.begin() + i);
+vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods, bool minus){
+    for (int i = 0; i < orders.size(); i++){
+        if (orders[i].goodName == orders[button].goodName){
+            orders[i].count--;
+            if (orders[i].count == 0){
+                orders.erase(orders.begin() + i);
             }
         }
     }
-    return order;
+    return orders;
 }
 
 
-string editOne(string str, bool add){
-    int res = stoi(str);
-    add ? res++ : res--;
-    return res < 0 ? to_string(0) : to_string(res);
+
+int editOne(int num, bool add, int limit){;
+    add ? num++ : num--;
+    num = num > limit ? --num : num;
+    return num < 0 ? 0 : num;
 }
 
 
-string editOne(string str, bool add, string limit){
-    int res = stoi(str);
-    add ? res++ : res--;
-    res = res > stoi(limit) ? (stoi(str)) : res;
-    return res < 0 ? to_string(0) : to_string(res);
-}
+// void editCount(int button, Goods goods){
+
+//     sqlite3 *db;
+//     string sql;
+//     sqlite3_open(WAYTODB, &db);
+//     int miidleButton = button / 2;
+//     if (button % 2 == 0){ 
+//         sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
+//     }
+//     else {
+//         if (goods.count[miidleButton] != '0'){
+//             sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[miidleButton] + "';";
+//         }
+//     }
+//     sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
+//     sqlite3_close(db);
+// }
 
 
-void editCount(int button, Goods goods){
+// vector <Good> updateGoods(){
+//     vector <Good> goods;
+//     sqlite3 *db;
+//     sqlite3_open(WAYTODB, &db);
 
-    sqlite3 *db;
-    string sql;
-    sqlite3_open(WAYTODB, &db);
-    int miidleButton = button / 2;
-    if (button % 2 == 0){ 
-        sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
-    }
-    else {
-        if (goods.count[miidleButton] != '0'){
-            sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[miidleButton] + "';";
-        }
-    }
-    sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
-    sqlite3_close(db);
-}
+//     sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
+//     sqlite3_close(db);
 
-
-Goods updateGoods(){
-    Goods goods;
-    sqlite3 *db;
-    sqlite3_open(WAYTODB, &db);
-
-    sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
-    sqlite3_close(db);
-
-    return goods;
-}
+//     return goods;
+// }
 
 
 static int listOfGoodsCallback(void *unused, int count, char **data, char **columns){      
-  
-    Goods *goods = static_cast<Goods*>(unused);
-    goods -> name.push_back(data[0]);
-    goods -> count.push_back(data[1]);
+
+    vector <Good> *goods = static_cast<vector <Good>* >(unused);
+
+    Good good;
+
+    good.name = data[0];
+    good.count = stoi(data[1]);
+    
+    goods -> push_back(good);
     
     return 0;
 }
