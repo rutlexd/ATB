@@ -1,7 +1,29 @@
-# MVP 
-</br>1. Check name ( relies user text input, create sql-request into USERS name, 
-if name found ask password , else add name to table USERS and ask to create password)
-</br>2. Show list with goods ( sql-request , show list from table GOODS (name , count))
-</br>3. Realies facilities to change count (increment / decremnt count)
-</br>![Alt text](.gitignore/login.png "Login window") ![Alt text](.gitignore/shop.png "Shop window")
+# <p align = "center">**ATB** </p>
 
+
+### Info
+
+**ATB** is a [my](https://github.com/rutlexd) pet-project. </br> In which i researched ***SQLite*** also with ***GUI***, i relise it with ***SFML***.
+
+
+### Func part
+
+At first you need login or registry, after succeffuly enter you can take or put some goods
+
+
+</br>![Alt text](src/login.png "Login window") ![Alt text](src/shop.png "Shop window")
+
+### Setup (Ubuntu)
+
+``` sh
+$ sudo apt-get install libsfml-dev
+$ git clone https://github.com/rutlexd/ATB.git
+```
+
+### Compiling 
+``` sh
+$ sudo apt install g++
+$ sudo apt-get install sqlite3 libsqlite3-dev
+$ g++ -c main.cpp
+$ g++ main.o -o app -lsqlite3 -lsfml-system -lsfml-window -lsfml-graphics
+```
