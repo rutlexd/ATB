@@ -111,7 +111,7 @@ bool checkLogin(){
     Text passwordInputText;
 
     passwordInputText = nameInputText;
-    
+
     passwordInputText.setPosition(Vector2f(inputBoxX, passwordInputBoxY));
 
     Text sentNameText;
@@ -342,12 +342,12 @@ void showShop (){
         y += ROWHIGHT;
     }
 
-    int yPls = 20;
-    int xPls = 180;
-   
+    int plusY = 20;
+    int plusX = 180;
+    int plusTextX = plusX + opButtonWidth / 4;
     RectangleShape opButton;
 
-    opButton.setSize(Vector2f(30,30));
+    opButton.setSize(Vector2f(opButtonWidth,opButtonHight);
     opButton.setOutlineThickness(3);
     opButton.setOutlineColor(Color::Black);
     opButton.setFillColor(Color::White);
@@ -360,9 +360,9 @@ void showShop (){
     for (auto i = 0; i < products.size(); i++){
         plusButton.push_back(opButton);
         plusText.push_back(plus);
-        plusButton[i].setPosition(xPls, yPls);
-        plusText[i].setPosition(xPls + 5, yPls);
-        yPls += ROWHIGHT;
+        plusButton[i].setPosition(plusX, plusY);
+        plusText[i].setPosition(plusTextX, plusY);
+        plusY += ROWHIGHT;
     }
     
     vector <Order> orders;
