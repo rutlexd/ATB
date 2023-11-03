@@ -729,7 +729,6 @@ static int listOfGoodsCallback(void *unused, int count, char **data, char **colu
     return 0;
 }
 
-
 Font getFont(){ 
 
     Font font;
