@@ -53,9 +53,9 @@ int getNameIndex (string str, vector <Good> goods);
 const int WIDTH = 800;
 const int HIGHT = 700;
 const int FRAME = 11;
-const Font defaultFont = getFont();
-const char *WAYTODB = "src/Database.db";
-const int ROWHIGHT = 40;
+const Font DEFAULT_FONT = getFont();
+const char *DB_WAY = "src/Database.db";
+const int ROW_HIGHT = 40;
 
 int main(){
 
@@ -67,99 +67,104 @@ int main(){
 
 bool checkLogin(){
     
-    int loginWindowWidth = 300;
-    int loginWindowHight = 600;
+    const int loginWindowWidth = 300;
+    const int loginWindowHight = 600;
+
+    const int BoxWidth = 120;
+    const int BoxHight = 30;
+    const int middleBox = BoxWidth / 4;
+    const int BoxPosX = 140;
+    const int nameInputBoxPosY = 150;
+    const int passwordInputBoxPosY = 240;
+    const int sentNamePosY = 340;
+    const int textPosX = 30;
+    const int inputErrorPosY = 200;
+    const int nameEnterPosY = 150;
+    const int passwordEnterPosY = 240;
 
     RenderWindow window(VideoMode(loginWindowWidth, loginWindowHight), "login");
     
     window.setFramerateLimit(FRAME);
 
-    Color swampGreenColor = Color (62, 122, 86);
-    Color coffeeColor = Color (158, 143, 103);
+    const Color swampGreenColor = Color (62, 122, 86);
+    const Color coffeeColor = Color (158, 143, 103);
+
+    Text templateText;
+
+    templateText.setFont(DEFAULT_FONT);
+    templateText.setFillColor(Color::Black);
 
     RectangleShape templateButton;
 
     templateButton.setFillColor(Color::White);
     templateButton.setOutlineThickness(5);
     templateButton.setOutlineColor(Color::Black);
-
-    int inputBoxWidth = 120;
-    int inputBoxHight = 30;
-    int inputBoxX = 140;
-    int nameInputBoxY = 150;
-    int passwordInputBoxY = 240;
+    templateButton.setSize(Vector2f(BoxWidth, BoxHight));
 
     RectangleShape nameInputBox;
 
     nameInputBox = templateButton; 
-    nameInputBox.setSize(Vector2f(inputBoxWidth, inputBoxHight));
-    nameInputBox.setPosition(Vector2f (inputBoxX, nameInputBoxY));
+    nameInputBox.setPosition(Vector2f (BoxPosX, nameInputBoxPosY));
 
     RectangleShape passwordInputBox;
 
     passwordInputBox = templateButton;
-    passwordInputBox.setSize(Vector2f(inputBoxWidth, inputBoxHight));
-    passwordInputBox.setPosition(Vector2f (inputBoxX, passwordInputBoxY));
+    passwordInputBox.setPosition(Vector2f (BoxPosX, passwordInputBoxPosY));
+
+    RectangleShape sentNameButton;
+
+    sentNameButton = templateButton;
+    sentNameButton.setFillColor(coffeeColor);
+    sentNameButton.setPosition(Vector2f (BoxPosX, sentNamePosY));
 
     Text nameInputText;
 
-    nameInputText.setFont(defaultFont);
-    nameInputText.setFillColor(Color::Black);
-    nameInputText.setPosition(Vector2f (inputBoxX, nameInputBoxY));
+    nameInputText = templateText;
+    nameInputText.setPosition(Vector2f (BoxPosX, nameInputBoxPosY));
     nameInputText.setCharacterSize(14);
 
     Text passwordInputText;
 
     passwordInputText = nameInputText;
 
-    passwordInputText.setPosition(Vector2f(inputBoxX, passwordInputBoxY));
+    passwordInputText.setPosition(Vector2f(BoxPosX, passwordInputBoxPosY));
 
     Text sentNameText;
 
-    sentNameText.setString("Enter"); // TODO refact for all down func
-    sentNameText.setFont(defaultFont);
-    sentNameText.setFillColor(Color::Black);
-    sentNameText.setPosition(Vector2f (160, 340));
-
-    RectangleShape sentNameButton;
-
-    sentNameButton.setSize(Vector2f (inputBoxWidth, inputBoxHight));
-    sentNameButton.setFillColor(coffeeColor);
-    sentNameButton.setPosition(Vector2f (inputBoxX, 340));
-    sentNameButton.setOutlineThickness(5);
-    sentNameButton.setOutlineColor(Color::Black);
+    sentNameText = templateText;
+    sentNameText.setString("Enter");
+    sentNameText.setPosition(Vector2f (BoxPosX + middleBox, sentNamePosY));
 
     Text inputError;
 
-    inputError.setFont(defaultFont);
+    inputError = templateText;
     inputError.setFillColor(Color::Red);
     inputError.setString("Error, try again");
-    inputError.setPosition(Vector2f (120, 200));
+    inputError.setPosition(Vector2f (textPosX, inputErrorPosY));
     inputError.setCharacterSize(16);
 
     Text nameEnter;
 
-    nameEnter.setFont(defaultFont);
-    nameEnter.setFillColor(Color::Black);
+    nameEnter = templateText;
     nameEnter.setString("Name");
-    nameEnter.setPosition(Vector2f (30, 150));
+    nameEnter.setPosition(Vector2f (textPosX, nameEnterPosY));
     nameEnter.setCharacterSize(20);
 
     Text passwordEnter;
 
-    passwordEnter.setFont(defaultFont);
-    passwordEnter.setFillColor(Color::Black);
+    passwordEnter = templateText;
     passwordEnter.setString("Password");
-    passwordEnter.setPosition(Vector2f (30, 240));
+    passwordEnter.setPosition(Vector2f (textPosX, passwordEnterPosY));
     passwordEnter.setCharacterSize(20);
 
     bool isPasswordInput = false;
     bool isNameInput = false;
-
     bool isInputError = false;
 
     string playerNameInput;
     string playerPasswordInput;
+
+    bool unpressCheck;
 
     while (window.isOpen()){
 
@@ -172,29 +177,39 @@ bool checkLogin(){
         }
 
         window.clear(swampGreenColor);
+        
+        if (event.type != Event::TextEntered){
+            unpressCheck = true;
+        }
 
-        if (event.type == Event::TextEntered){   // TODO check to unpressed
-            if (isNameInput){            
-                if (event.text.unicode == 8 && playerNameInput.length() > 0){
-                    playerNameInput.erase(playerNameInput.end() - 1);
-                    nameInputText.setString(playerNameInput);
+        if (event.type == Event::TextEntered){
+            int textCode = event.text.unicode;
+
+            while(event.type == Event::TextEntered && unpressCheck == true) {
+                if (isNameInput){            
+                    if (textCode == 8 && playerNameInput.length() > 0){
+                        playerNameInput.erase(playerNameInput.end() - 1);
+                        nameInputText.setString(playerNameInput);
+                    }
+                    else if (textCode < 128 && textCode != 8)
+                    {
+                        playerNameInput += textCode;
+                        nameInputText.setString(playerNameInput);
+                    }
                 }
-                else if (event.text.unicode < 128 && event.text.unicode != 8)
-                {
-                    playerNameInput += event.text.unicode;
-                    nameInputText.setString(playerNameInput);
+                else if (isPasswordInput){
+                    if (textCode == 8 && playerPasswordInput.length() > 0){
+                        playerPasswordInput.erase(playerPasswordInput.end() - 1);
+                        passwordInputText.setString(playerPasswordInput);
+                    }
+                    else if (textCode < 128 && textCode != 8){
+                        playerPasswordInput += textCode;
+                        passwordInputText.setString(playerPasswordInput);
+                    }
                 }
-            }
-            else if (isPasswordInput){
-                if (event.text.unicode == 8 && playerPasswordInput.length() > 0){
-                    playerPasswordInput.erase(playerPasswordInput.end() - 1);
-                    passwordInputText.setString(playerPasswordInput);
-                }
-                else if (event.text.unicode < 128 && event.text.unicode != 8){
-                    playerPasswordInput += event.text.unicode;
-                    passwordInputText.setString(playerPasswordInput);
-                }
-            }
+                unpressCheck = false;
+            } ;
+        
         }
 
         if (Mouse::isButtonPressed(Mouse::Left)){         
@@ -266,7 +281,7 @@ void showShop (){
     Text plus;
     char plusSymbol = '+';
 
-    plus.setFont(defaultFont);
+    plus.setFont(DEFAULT_FONT);
     plus.setFillColor(Color::Black);
     plus.setCharacterSize(24);
     plus.setString(plusSymbol);
@@ -282,7 +297,7 @@ void showShop (){
 
     Text textTemplate;
 
-    textTemplate.setFont(defaultFont);
+    textTemplate.setFont(DEFAULT_FONT);
     textTemplate.setFillColor(Color::Black);
     textTemplate.setCharacterSize(18);
 
@@ -339,7 +354,7 @@ void showShop (){
         separator[i].setString(separatorSymbol);
         separator[i].setPosition(separatorX, y);
 
-        y += ROWHIGHT;
+        y += ROW_HIGHT;
     }
 
     int plusY = 20;
@@ -347,7 +362,7 @@ void showShop (){
     int plusTextX = plusX + opButtonWidth / 4;
     RectangleShape opButton;
 
-    opButton.setSize(Vector2f(opButtonWidth,opButtonHight);
+    opButton.setSize(Vector2f(opButtonWidth,opButtonHight));
     opButton.setOutlineThickness(3);
     opButton.setOutlineColor(Color::Black);
     opButton.setFillColor(Color::White);
@@ -362,7 +377,7 @@ void showShop (){
         plusText.push_back(plus);
         plusButton[i].setPosition(plusX, plusY);
         plusText[i].setPosition(plusTextX, plusY);
-        plusY += ROWHIGHT;
+        plusY += ROW_HIGHT;
     }
     
     vector <Order> orders;
@@ -469,7 +484,7 @@ vector <Text> setDataText(vector <Order>  order){
     Text minusText;
     char minusSymbol = '-';
 
-    minusText.setFont(defaultFont);
+    minusText.setFont(DEFAULT_FONT);
     minusText.setFillColor(Color::Black);
     minusText.setCharacterSize(18);
     minusText.setString(minusSymbol);
@@ -480,7 +495,7 @@ vector <Text> setDataText(vector <Order>  order){
     for (int i = 0; i < order.size(); i++){
         output.push_back(minusText);
         output[i].setPosition(xMinus, yMinus);
-        yMinus += ROWHIGHT;
+        yMinus += ROW_HIGHT;
     } 
 
     return output;   
@@ -504,7 +519,7 @@ vector <RectangleShape> setDataButton(vector <Order> orders){
     for(int i = 0; i < orders.size(); i++){
         buttons.push_back(opButton);
         buttons[i].setPosition(xMin, yMin);
-        yMin += ROWHIGHT;
+        yMin += ROW_HIGHT;
     }
     
     return buttons;
@@ -515,7 +530,7 @@ vector <Text> getDataGood(vector <Order> order){
 
     Text templateText;
 
-    templateText.setFont(defaultFont);
+    templateText.setFont(DEFAULT_FONT);
     templateText.setFillColor(Color::Black);
     templateText.setCharacterSize(18);
 
@@ -528,7 +543,7 @@ vector <Text> getDataGood(vector <Order> order){
         output.push_back(templateText);
         output[i].setString(order[i].goodName);
         output[i].setPosition(x, y);
-        y += ROWHIGHT;
+        y += ROW_HIGHT;
     }
 
     return output;
@@ -539,7 +554,7 @@ vector <Text> getDataCount(vector <Order> orders){
 
     Text templateText;
 
-    templateText.setFont(defaultFont);
+    templateText.setFont(DEFAULT_FONT);
     templateText.setFillColor(Color::Black);
     templateText.setCharacterSize(18);
 
@@ -552,7 +567,7 @@ vector <Text> getDataCount(vector <Order> orders){
         output.push_back(templateText);
         output[i].setString(to_string(orders[i].count));
         output[i].setPosition(x, y);
-        y += ROWHIGHT;
+        y += ROW_HIGHT;
     }
 
     return output;
@@ -578,7 +593,7 @@ bool loginUser(string inputName, string inputPassword){
     char *errMsg = nullptr;
     string sql = "INSERT INTO USERS(username, password) VALUES('"+ name +"', '"+ password +"');";
 
-    int rc = sqlite3_open(WAYTODB, &db);
+    int rc = sqlite3_open(DB_WAY, &db);
 
     User user;
     user.name = name;
@@ -625,7 +640,7 @@ vector <Good> createGoods(){
     sqlite3 *db;
     vector <Good> goods;
 
-    sqlite3_open(WAYTODB, &db);
+    sqlite3_open(DB_WAY, &db);
     sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
     sqlite3_close(db);
 
@@ -688,7 +703,7 @@ int editOne(int num, bool add, int limit){
 
 //     sqlite3 *db;
 //     string sql;
-//     sqlite3_open(WAYTODB, &db);
+//     sqlite3_open(DB_WAY, &db);
 //     int miidleButton = button / 2;
 //     if (button % 2 == 0){ 
 //         sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
@@ -704,9 +719,10 @@ int editOne(int num, bool add, int limit){
 
 
 // vector <Good> updateGoods(){
+
 //     vector <Good> goods;
 //     sqlite3 *db;
-//     sqlite3_open(WAYTODB, &db);
+//     sqlite3_open(DB_WAY, &db);
 
 //     sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
 //     sqlite3_close(db);
