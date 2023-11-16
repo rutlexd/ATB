@@ -1,34 +1,12 @@
 #include <iostream>
-#include <string>
 #include <cstring>
 #include <vector>
 #include "src/sqlite3.h"
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/System.hpp>
+#include "class.h"
+#include "sfml.h"
 
 using namespace std;
 using namespace sf;
-
-struct User
-{
-    string name;
-    string password;
-    bool successfullyCheck = false;
-};
-
-struct Good
-{
-    string name;
-    int count;
-};
-
-struct Order
-{
-    string goodName;
-    int count;
-    User user;
-};
 
 string deleteSpaceInString(string name);
 static int loginCallback(void *unused, int count, char **data, char **columns);
@@ -40,22 +18,16 @@ bool loginUser(string inputName, string inputPassword);
 vector <Good> createGoods();
 void editCount(int button, vector <Good> goods);
 vector <Good> updateGoods();
-Font getFont();
 vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods);
 vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods, bool minus);
 int editOne(int num, bool add, int limit);
-vector <Text> getDataCount(vector <Order> orders);
-vector <Text> getDataGood(vector <Order> orders);
-vector <RectangleShape> setDataButton(vector <Order> orders);
-vector <Text> setDataText(vector <Order> orders);
+vector <Text> updateOrderGoodsCount(vector <Order> orders);
+vector <Text> updateOrderGoods(vector <Order> orders);
+vector <RectangleShape> createButton(vector <Order> orders);
+vector <Text> createText(vector <Order> orders);
 int getNameIndex (string str, vector <Good> goods);
 
-const int WIDTH = 800;
-const int HIGHT = 700;
-const int FRAME = 11;
-const Font DEFAULT_FONT = getFont();
 const char *DB_WAY = "src/Database.db";
-const int ROW_HIGHT = 40;
 
 int main(){
 
@@ -86,13 +58,11 @@ bool checkLogin(){
     
     window.setFramerateLimit(FRAME);
 
-    const Color swampGreenColor = Color (62, 122, 86);
-    const Color coffeeColor = Color (158, 143, 103);
-
     Text templateText;
 
     templateText.setFont(DEFAULT_FONT);
     templateText.setFillColor(Color::Black);
+    templateText.setCharacterSize(14);
 
     RectangleShape templateButton;
 
@@ -121,12 +91,11 @@ bool checkLogin(){
 
     nameInputText = templateText;
     nameInputText.setPosition(Vector2f (BoxPosX, nameInputBoxPosY));
-    nameInputText.setCharacterSize(14);
+    
 
     Text passwordInputText;
 
-    passwordInputText = nameInputText;
-
+    passwordInputText = templateText;
     passwordInputText.setPosition(Vector2f(BoxPosX, passwordInputBoxPosY));
 
     Text sentNameText;
@@ -305,20 +274,20 @@ void showShop (){
 
     int loginButtonWidth = 90;
     int loginButtonHight = 30;
-    int loginButtonX = 500;
-    int loginButtonY = 100;
+    int loginButtonPosX = 500;
+    int loginButtonPosY = 100;
 
     loginButton = operatesButton;
     loginButton.setSize(Vector2f (loginButtonWidth, loginButtonHight));
-    loginButton.setPosition(loginButtonX, loginButtonY);
+    loginButton.setPosition(loginButtonPosX, loginButtonPosY);
 
     Text loginText;
-    int loginTextX = loginButtonX + loginButtonWidth / 4;
-    int loginTextY = loginButtonY + loginButtonHight / 4;
+    int loginTextPosX = loginButtonPosX + loginButtonWidth / 4;
+    int loginTextPosY = loginButtonPosY + loginButtonHight / 4;
 
     loginText = textTemplate;
     loginText.setString("login");
-    loginText.setPosition(loginTextX, loginTextY);
+    loginText.setPosition(loginTextPosX, loginTextPosY);
    
     vector <Text> products;
     vector <Text> countProd;
@@ -326,40 +295,40 @@ void showShop (){
     vector <Text> countSaleText;
     vector <int> countSale;
 
-    char separatorSymbol = '/';
+    const char separatorSymbol = '/';
 
-    int y = 20;
+    int globalPosY = 20;
 
-    int productsX = 20;
-    int countProdX = 370;
-    int countSaleX = 340;
-    int separatorX = 360;
+    int productsPosX = 20;
+    int countProdPosX = 370;
+    int countSalePosX = 340;
+    int separatorPosX = 360;
 
     for (auto i = 0; i < goods.size(); i++){
         products.push_back(textTemplate);
         products[i].setString(goods[i].name);
-        products[i].setPosition(Vector2f (productsX, y));
+        products[i].setPosition(Vector2f (productsPosX, globalPosY));
 
         countProd.push_back(textTemplate);
         countProd[i].setString(to_string(goods[i].count));
-        countProd[i].setPosition(Vector2f (countProdX, y));
+        countProd[i].setPosition(Vector2f (countProdPosX, globalPosY));
 
         countSaleText.push_back(textTemplate);
         countSaleText[i].setString(to_string(goods[i].count));
-        countSaleText[i].setPosition(Vector2f (countSaleX, y));
+        countSaleText[i].setPosition(Vector2f (countSalePosX, globalPosY));
 
         countSale.push_back(goods[i].count);
 
         separator.push_back(textTemplate);
         separator[i].setString(separatorSymbol);
-        separator[i].setPosition(separatorX, y);
+        separator[i].setPosition(separatorPosX, globalPosY);
 
-        y += ROW_HIGHT;
+        globalPosY += ROW_HIGHT;
     }
 
-    int plusY = 20;
-    int plusX = 180;
-    int plusTextX = plusX + opButtonWidth / 4;
+    int plusPosY = 20;
+    int plusPosX = 180;
+    int plusTextPosX = plusPosX + opButtonWidth / 4;
     RectangleShape opButton;
 
     opButton.setSize(Vector2f(opButtonWidth,opButtonHight));
@@ -369,23 +338,24 @@ void showShop (){
    
     vector <RectangleShape> plusButton;
     vector <RectangleShape> minusButton;
-    vector <Text> plusText;
-    vector <Text> minusText;
+    vector <Text> plusButtonText;
+    vector <Text> minusButtonText;
 
     for (auto i = 0; i < products.size(); i++){
         plusButton.push_back(opButton);
-        plusText.push_back(plus);
-        plusButton[i].setPosition(plusX, plusY);
-        plusText[i].setPosition(plusTextX, plusY);
-        plusY += ROW_HIGHT;
+        plusButtonText.push_back(plus);
+        plusButton[i].setPosition(plusPosX, plusPosY);
+        plusButtonText[i].setPosition(plusTextPosX, plusPosY);
+        plusPosY += ROW_HIGHT;
     }
     
     vector <Order> orders;
-
     vector <Text> orderGoodName;
     vector <Text> orderGoodCount;
 
     bool succesLogin = false;
+    bool updateChecker = true;
+
 
     while (shop.isOpen()){
         Event event;
@@ -395,7 +365,8 @@ void showShop (){
             }
         }
 
-        shop.clear(Color::Cyan);
+        
+
         if (Mouse::isButtonPressed(Mouse::Left)){
             Vector2i MousePos = Mouse::getPosition(shop);
             for (auto buttonIndex = 0; buttonIndex < products.size(); buttonIndex++){
@@ -406,15 +377,20 @@ void showShop (){
                     string saleText = to_string(countSale[buttonIndex]);
                     countSaleText[buttonIndex].setString(saleText);
 
-                    orderGoodName = getDataGood(orders);
-                    orderGoodCount = getDataCount(orders);
+                    orderGoodName = updateOrderGoods(orders);
+                    orderGoodCount = updateOrderGoodsCount(orders);
 
-                    minusButton = setDataButton(orders);
-                    minusText = setDataText(orders);
+                    minusButton = createButton(orders);
+                    minusButtonText = createText(orders);
+
+                    updateChecker = true;
+                    break;
                 }
-            }
+            } // TODO  create optimization to end
             for (auto buttonIndex = 0; buttonIndex < orders.size(); buttonIndex++){
-                if (minusButton[buttonIndex].getGlobalBounds().contains(MousePos.x, MousePos.y)){ 
+                cout << "w" << endl;
+                bool isContainsMouse = minusButton[buttonIndex].getGlobalBounds().contains(MousePos.x, MousePos.y);
+                if (isContainsMouse){ 
                     int index = getNameIndex(orders[buttonIndex].goodName, goods);
                     orders = editOrder(orders, buttonIndex, goods, true);
 
@@ -422,14 +398,17 @@ void showShop (){
                     string saleText = to_string(countSale[buttonIndex]);
                     countSaleText[index].setString(saleText);
 
-                    orderGoodName = getDataGood(orders);
-                    orderGoodCount = getDataCount(orders);
+                    orderGoodName = updateOrderGoods(orders);
+                    orderGoodCount = updateOrderGoodsCount(orders);
 
-                    minusButton = setDataButton(orders);
-                    minusText = setDataText(orders);                    
+                    minusButton = createButton(orders);
+                    minusButtonText = createText(orders);
+                    updateChecker = true;
+                    break;
                 }
             }
             if (loginButton.getGlobalBounds().contains(MousePos.x, MousePos.y)){
+                cout << "e" << endl;
                 succesLogin = checkLogin();
                 if (succesLogin){
                     cout << "hip hip" << endl; // TODO logic for login
@@ -437,29 +416,34 @@ void showShop (){
             }
         }        
 
-        for (auto i = 0; i < products.size(); i++){
-            shop.draw(products[i]);
-            shop.draw(countProd[i]);
+        if(updateChecker){
+            shop.clear(Color::Blue);
+        
+            for (auto i = 0; i < products.size(); i++){
+                shop.draw(products[i]);
+                shop.draw(countProd[i]);
 
-            shop.draw(separator[i]);
-            shop.draw(countSaleText[i]);
+                shop.draw(separator[i]);
+                shop.draw(countSaleText[i]);
 
-            shop.draw(plusButton[i]);
-            shop.draw(plusText[i]);
+                shop.draw(plusButton[i]);
+                shop.draw(plusButtonText[i]);
+            }
+
+            for (auto i = 0; i < orderGoodName.size(); i++){
+                shop.draw(orderGoodName[i]);
+                shop.draw(orderGoodCount[i]);
+
+                shop.draw(minusButton[i]);
+                shop.draw(minusButtonText[i]);                        
+            }
+
+            shop.draw(orderText);
+            shop.draw(loginButton);
+            shop.draw(loginText);
+
+            updateChecker = false;
         }
-
-        for (auto i = 0; i < orderGoodName.size(); i++){
-            shop.draw(orderGoodName[i]);
-            shop.draw(orderGoodCount[i]);
-
-            shop.draw(minusButton[i]);
-            shop.draw(minusText[i]);                        
-        }
-
-        shop.draw(orderText);
-
-        shop.draw(loginButton);
-        shop.draw(loginText);
 
         shop.display();
     }
@@ -478,31 +462,32 @@ int getNameIndex(string name, vector <Good> goods){
 }
 
 
-vector <Text> setDataText(vector <Order>  order){
+vector <Text> createText(vector <Order>  order){
 
     vector <Text> output;
+
     Text minusText;
-    char minusSymbol = '-';
+    const char minusSymbol = '-';
 
     minusText.setFont(DEFAULT_FONT);
     minusText.setFillColor(Color::Black);
     minusText.setCharacterSize(18);
     minusText.setString(minusSymbol);
 
-    int yMinus = 400;
-    int xMinus = 200;
+    int minusPosY = 400;
+    int minusPosX = 200;
 
     for (int i = 0; i < order.size(); i++){
         output.push_back(minusText);
-        output[i].setPosition(xMinus, yMinus);
-        yMinus += ROW_HIGHT;
+        output[i].setPosition(minusPosX, minusPosY);
+        minusPosY += ROW_HIGHT;
     } 
 
     return output;   
 }
 
 
-vector <RectangleShape> setDataButton(vector <Order> orders){
+vector <RectangleShape> createButton(vector <Order> orders){
 
     vector <RectangleShape> buttons;
    
@@ -526,7 +511,7 @@ vector <RectangleShape> setDataButton(vector <Order> orders){
 }
 
 
-vector <Text> getDataGood(vector <Order> order){
+vector <Text> updateOrderGoods(vector <Order> order){
 
     Text templateText;
 
@@ -550,7 +535,7 @@ vector <Text> getDataGood(vector <Order> order){
 }
 
 
-vector <Text> getDataCount(vector <Order> orders){
+vector <Text> updateOrderGoodsCount(vector <Order> orders){
 
     Text templateText;
 
@@ -683,7 +668,6 @@ vector <Order> editOrder(vector <Order> orders, int button, vector <Good> goods,
 }
 
 
-
 int editOne(int num, bool add, int limit){
 
     add ? num++ : num--;
@@ -699,38 +683,6 @@ int editOne(int num, bool add, int limit){
 }
 
 
-// void editCount(int button, Goods goods){
-
-//     sqlite3 *db;
-//     string sql;
-//     sqlite3_open(DB_WAY, &db);
-//     int miidleButton = button / 2;
-//     if (button % 2 == 0){ 
-//         sql = "UPDATE GOODS SET count = count + 1 WHERE name = '"+ goods.name[miidleButton] + "';";
-//     }
-//     else {
-//         if (goods.count[miidleButton] != '0'){
-//             sql = "UPDATE GOODS SET count = count - 1 WHERE name = '"+ goods.name[miidleButton] + "';";
-//         }
-//     }
-//     sqlite3_exec(db, sql.c_str(), NULL, NULL, NULL);
-//     sqlite3_close(db);
-// }
-
-
-// vector <Good> updateGoods(){
-
-//     vector <Good> goods;
-//     sqlite3 *db;
-//     sqlite3_open(DB_WAY, &db);
-
-//     sqlite3_exec(db, "SELECT * FROM GOODS", listOfGoodsCallback, &goods, NULL);
-//     sqlite3_close(db);
-
-//     return goods;
-// }
-
-
 static int listOfGoodsCallback(void *unused, int count, char **data, char **columns){      
 
     vector <Good> *goods = static_cast<vector <Good>* >(unused);
@@ -743,13 +695,4 @@ static int listOfGoodsCallback(void *unused, int count, char **data, char **colu
     goods -> push_back(good);
     
     return 0;
-}
-
-
-Font getFont(){ 
-
-    Font font;
-    font.loadFromFile("src/Mooli-Regular.ttf");
-
-    return font;
 }
